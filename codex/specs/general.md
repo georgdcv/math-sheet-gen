@@ -1,12 +1,6 @@
-Im Tool sollst du mit einer `config.yaml` eine Sammlung von Aufgabentypen konfigurieren und daraus ein oder mehrere Arbeitsblätter als drucktaugliches HTML erzeugen. Grundlage ist das hochgeladene Arbeitsblatt mit 8 nummerierten Aufgabenblöcken, Kopfzeile (Name/Datum) und klaren Rahmen-Layouts.
-
-Im Folgenden eine Spezifikation, mit der du das Tool direkt umsetzen kannst.
-
----
-
 ## 1. Ziel und Umfang
 
-* **Ziel:** Generierung von Grundschul-Mathe-Arbeitsblättern (Klasse 1/2) im Stil des Beispiels als **einzelne HTML-Dateien**, optimiert für A4-Druck (Hochformat).
+* **Ziel:** Generierung von Grundschul-Mathe-Arbeitsblättern als **einzelne HTML-Dateien**, optimiert für A4-Druck (Hochformat) inkl. Lösungsblätter.
 * **Konfiguration:** erfolgt ausschließlich über `config.yaml`.
 * **Batch:** Mehrere Arbeitsblätter mit identischen Einstellungen, aber unterschiedlichen zufälligen Zahlen.
 * **Keine Interaktivität:** HTML nur als Drucklayout, keine Eingabelogik im Browser.
@@ -15,28 +9,31 @@ Im Folgenden eine Spezifikation, mit der du das Tool direkt umsetzen kannst.
 
 ## 2. Unterstützte Aufgabentypen (Version 1)
 
-Angelehnt an das Beispielblatt:
-
 Jeder Aufgabentyp erhält einen internen `type`-Bezeichner.
 
 1. **Zahldiktat (`number_dictation`)**
 
+   * Instruktion: "Zahlendiktat"
    * Darstellung: eine Zeile mit n leeren Kästchen (Rahmen).
    * Konfigurierbar: Anzahl der Kästchen.
    * Optional: „Hilfszahlen“ im Lösungsblatt, im Arbeitsblatt bleiben Kästchen leer.
 
 2. **Zahlen vergleichen (`compare_numbers`)**
 
-   * Jedes Item: Paar ganzer Zahlen (a, b) mit Leerfeld für `<`, `>` oder `=`.
-   * Layout: Spalten, jede Zeile mehrere Paare, ähnlich wie auf Seite 1.
+   * Instruktion: "Vergleiche! <, >, ="
+   * Jedes Item: Paar ganzer Zahlen (a, b) mit Leerfeld (Kreis) für `<`, `>` oder `=`.
+   * Layout: Spalten, jede Zeile mehrere Paare.
    * Konfiguration:
 
      * `item_count`: Anzahl der Vergleiche.
      * `min_value`, `max_value`: Zahlenbereich.
      * `columns`: Anzahl Spalten (Standard 3).
+    
+   * Lösungsblatt: Eintragen der korrekten Vergleichszeichen stt der Leerfelder (Kreise)
 
 3. **Vorgänger / Zahl / Nachfolger (`pre_succ_table`)**
 
+   * Instruktion: keine
    * Tabelle mit 3 Spalten: „Vorgänger | Zahl | Nachfolger“.
    * Pro Zeile sind ein oder mehrere Felder ausgefüllt, die übrigen leer.
    * Konfiguration:
@@ -44,9 +41,12 @@ Jeder Aufgabentyp erhält einen internen `type`-Bezeichner.
      * `row_count`.
      * `min_value`, `max_value`.
      * `given_field`: `middle`, `left`, `right` oder `mixed`.
+    
+   * Lösungsblatt: Alle Zahlen eingetragen
 
 4. **Rechnen in einer Liste (`arithmetic_list`)**
 
+   * Instruktion: "Rechne! Achte auf das Rechenzeichen!"
    * Einfache Plus/Minus-Aufgaben (z. B. im Zahlenraum bis 20) in zwei oder mehr Spalten untereinander.
    * Konfiguration:
 
@@ -59,25 +59,30 @@ Jeder Aufgabentyp erhält einen internen `type`-Bezeichner.
 5. **Zahlwort – Würfelbild – Zahl (`number_word_table`)**
 
    * Tabelle mit Spalten „Zahlwort | Würfelbild | Zahl“.
-   * Variante des Beispielblatts, Würfelbild kann vorerst nur als vereinfachte ASCII- oder Punktdarstellung umgesetzt werden (z. B. `<span class="dice">•••</span>`).
+   * Zahlwort für zweistellige Zahlen (Beispiel "neunundvierzig", "und" wird unterstrichen).
+   * Würfelbild kann vorerst nur als vereinfachte ASCII- oder Punktdarstellung umgesetzt werden (z. B. `<span class="dice">•••</span>`). Ganze Zehner werden als Vertikale Striche dargestellt. Die Einer als Würfelbilder dargestellt, wobei 5 ggf. gruppiert werden.
    * Konfiguration:
-
+     * `first_row_example: Standardmäßig true; erste Spalte ist mit einem Beispiel voll ausgefüllt
+     * `example_number`: 49
      * `row_count`.
      * `min_value`, `max_value` (z. B. 11–99).
      * `given_columns`: Liste aus `["word", "dice", "number"]`, welche Spalte(n) vorausgefüllt werden, die restlichen bleiben leer.
 
 6. **Zahlen ordnen (`ordering`)**
 
+   * Instruktion: "Ordne! Beginne mit der kleinsten/größten Zahl!" (es wird nur kleinsten oder größten angezeigt und unterstrichen)
    * Eine vorgegebene Liste von Zahlen, Schüler*innen sollen diese der Größe nach ordnen.
-   * Layout wie im Beispiel: Aufgabe „Ordne! Beginne mit der kleinsten Zahl!“ plus Zahlfolge, darunter eine Kette von Kästchen, ggf. mit `<`-Zeichen dazwischen.
+   * Layout wie im Beispiel: Aufgabe „Ordne! Beginne mit der kleinsten Zahl!“ plus Zahlfolge, darunter eine Kette von Kästchen, ggf. mit `<`- oder `>`-Zeichen dazwischen.
    * Konfiguration:
 
      * `set_size`: wie viele Zahlen im Set.
      * `min_value`, `max_value`.
+     * `order`: increasing (standard) vs. decreasing
      * `show_comparison_symbols`: Bool, ob `<` zwischen Kästchen dargestellt wird.
 
 7. **Rechentabellen (`operation_table`)**
 
+   * Instruktion: "Achte auf das Rechenzeichen!"
    * Tabellen wie in Aufgabe 7: links Plus-Tabelle, rechts Minus-Tabelle; Zeilen/Spalten mit Randzahlen und leeren Feldern.
    * Konfiguration:
 
@@ -87,23 +92,62 @@ Jeder Aufgabentyp erhält einen internen `type`-Bezeichner.
        * `row_headers`: Liste von Zahlen.
        * `col_headers`: Liste von Zahlen.
        * `given_cells`: Regellogik, z. B. `"none"`, `"diagonal"`, `"random_3"`.
+      
+     * Anpassungsbedarf: Der Zahlenraum der Lösungen muss konfigurierbar sein
+     * Zahlenschritte müssen definiert werden (z.B. nur 10er Zahle, z.B. 20+10=30)
 
 8. **Zahlenstrahl (`number_line`)**
 
-   * Horizontaler Zahlenstrahl mit gleichmäßigen Markierungen und Kästchen für bestimmte Zahlen (wie in Aufgabe 8).
-   * Konfiguration:
+Zahlenstrahl: Kästchen und Verbindungslinien
 
-     * `start`, `end`, `step` (z. B. 0–100 in Zehnerschritten).
-     * `boxes`: Anzahl Kästchen, deren Positionen automatisch gewählt oder ausdrücklich angegeben werden (Liste der Zielzahlen oder Indexe).
-     * Darstellung von z. B. vorgegebenen Zahlen in einigen Boxen.
+Der Zahlenstrahl bildet einen geschlossenen Wertebereich (z. B. 0–100) mit Tickmarken für jede ganze Zahl.
 
-Die Spezifikation ist so angelegt, dass du später weitere `type`s ergänzen kannst.
+Hauptticks (z. B. Vielfache von 10) sind länger/gekennzeichnet.
+
+Nebenticks (z. B. alle übrigen ganzen Zahlen) sind kürzer.
+
+RM2
+
+Oberhalb des Zahlenstrahls werden mehrere Eingabekästchen (number-box) dargestellt.
+
+Die Kästchen sind horizontal gleichmäßig verteilt und nicht zwingend direkt über dem Ziel-Tick angeordnet.
+
+Einige Kästchen können bereits mit einer Zahl beschriftet sein (z. B. „7“, „23“); andere bleiben leer.
+
+RM2
+
+Jedes Kästchen ist einem konkreten Tick auf dem Zahlenstrahl zugeordnet (z. B. Wert 7, 23, …).
+
+Vom unteren Rand des Kästchens führt eine schräge Verbindungslinie (connector) zu genau diesem Tick.
+
+Die Linie endet mittig auf der Tickmarke der zugehörigen Zahl.
+
+Da die Kästchen gleichmäßig verteilt sind, kann die Verbindungslinie nach links oder rechts geneigt sein; sie ist also nicht zwingend vertikal.
+
+Auf dem Arbeitsblatt:
+
+Kästchen sind leer (bis auf evtl. vorgegebene Beispiele),
+
+Schüler*innen sollen die Zahlen im Kästchen eintragen, die am Ende der jeweiligen Verbindungslinie auf dem Zahlenstrahl markiert sind.
+
+Auf dem Lösungsblatt:
+
+Jedes Kästchen enthält die korrekte Zahl des verbundenen Ticks (z. B. 7, 23, …).
+
+Die Zuordnung „Kästchen ↔ Tick“ bleibt visuell identisch, nur der Inhalt des Kästchens unterscheidet sich.
+
+Technische Anforderung:
+Das Layout muss es ermöglichen, Kästchen unabhängig von der exakten Tick-Position horizontal zu platzieren und die Verbindung über eine diagonal verlaufende Linie zum Tick herzustellen (z. B. über absolut positionierte, dünne Linien-Elemente mit Rotation).
+
+Konfigurierbarkeit fehlt hier noch!
 
 ---
 
 ## 3. YAML-Konfiguration
 
 ### 3.1. Dateiaufbau
+
+Beispielhaft! Muss nochmal abgeglichen werden mit der Spezifikation oben.
 
 ```yaml
 # config.yaml
@@ -291,31 +335,6 @@ Optional: Separat `render_solutions` auf der gleichen Datenbasis.
 </html>
 ```
 
-### 6.2. Einzelne Aufgabentypen
-
-* **Zahldiktat:** n `<span class="number-box"></span>` in einer Zeile.
-
-* **Vergleiche:** Tabelle mit Paaren, jede Zeile maximal `columns` Items, z. B.:
-
-  ```html
-  <table class="compare-table">
-    <tr>
-      <td>66</td><td><span class="circle"></span></td><td>29</td>
-      ...
-    </tr>
-  </table>
-  ```
-
-  `circle` kann z. B. ein leerer Kreis durch CSS (runder Rahmen) oder einfach ein Kästchen sein.
-
-* **Tabellen:** Standard-`<table>` mit CSS `border-collapse: collapse;`. Jede Zelle mit Rahmen.
-
-* **Zahlenstrahl:** einfache Umsetzung als Tabelle mit vielen schmalen Zellen, in denen Zahlen ggf. eingeblendet sind; Kästchen darüber durch zusätzliche Zeile mit `<div class="number-box"></div>` pro markiertem Punkt.
-
-Ziel: reines HTML + CSS, keine externen Ressourcen.
-
----
-
 ## 7. Randomisierung und Regeln
 
 * Pro Arbeitsblatt ein eigener RNG-Seed: `base_seed + worksheet_index`.
@@ -369,14 +388,9 @@ Damit stehen die erzeugten HTML-Arbeitsblätter in der Actions-Run-Ansicht als h
 
 ## 10. Erweiterungsmöglichkeiten (nicht zwingend für Version 1)
 
+* Erweiterung mit einem GUI zur Konfiguration der Arbeitsblätter und Auswahl von Aufgabentypen
 * PDF-Generierung aus HTML (z. B. mit `weasyprint` in einer separaten Pipeline).
 * Mehrsprachigkeit (konfigurierbare Labels „Name“, „Datum“, …).
 * Konfigurierbare Schriftarten (z. B. Druckschrift vs. Schulschrift, sofern im Browser verfügbar).
-* Konfigurierbare Lösungsblätter (z. B. nur Beispiele oder vollständig ausgefüllt).
 
----
 
-Wenn du möchtest, kann ich als nächsten Schritt:
-
-* ein minimales `config.yaml` + Gerüst für `generate_worksheets.py` skizzieren oder
-* die CSS-Klassen für ein möglichst nahes Layout an deinem Beispiel konkret ausformulieren.
