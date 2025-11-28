@@ -9,38 +9,38 @@ worksheet:
   tasks:
     - type: number_dictation
       title: "Zahlendiktat"
-      box_count: 12
+      box_count: 4
       show_helper_numbers: true
     - type: compare_numbers
       title: "Vergleiche! <, >, ="
-      item_count: 9
+      item_count: 4
       min_value: 0
       max_value: 100
-      columns: 3
-      equal_probability: 0.05
+      columns: 2
+      equal_probability: 0.01
     - type: pre_succ_table
-      row_count: 6
+      row_count: 4
       min_value: 0
       max_value: 100
       given_field: mixed
     - type: arithmetic_list
-      item_count: 12
+      item_count: 4
       operations: ["+", "-"]
       min_value: 0
       max_value: 20
       allow_negative_results: false
-      columns: 3
+      columns: 2
       cross_ten_probability: 1.0
       max_second_operand: 10
     - type: number_word_table
       first_row_example: true
-      example_number: 49
-      row_count: 5
+      example_number: 78
+      row_count: 2
       min_value: 11
       max_value: 99
       given_columns: ["word"]
     - type: ordering
-      set_size: 6
+      set_size: 4
       min_value: 10
       max_value: 99
       order: increasing
