@@ -1,5 +1,5 @@
 base_seed: 1234
-worksheet_count: 2
+worksheet_count: 5
 output:
   out_dir: out
   file_prefix: rechenmeister
@@ -19,7 +19,7 @@ worksheet:
       columns: 2
       equal_probability: 0.01
     - type: pre_succ_table
-      row_count: 4
+      row_count: 2
       min_value: 0
       max_value: 100
       given_field: mixed
@@ -48,17 +48,17 @@ worksheet:
     - type: operation_table
       title: "Achte auf das Rechenzeichen!"
       result_range:
-        min: 0
+        min: 10
         max: 100
       tables:
         - operation: "+"
-          row_count: 4
-          col_count: 4
-          given_cells: diagonal
-        - operation: "-"
-          row_count: 4
+          row_count: 2
           col_count: 2
-          given_cells: random_3
+          given_cells: random_1
+        - operation: "-"
+          row_count: 2
+          col_count: 2
+          given_cells: random_1
     - type: number_line
       start: 0
       end: 100
