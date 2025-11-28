@@ -108,75 +108,88 @@
   .tallies .tally {
     margin-right: 0.1cm;
   }
+  .dice-faces {
+    display: inline-flex;
+    gap: 0.1cm;
+    vertical-align: middle;
+  }
   .dice-face {
-    font-size: 16pt;
-    letter-spacing: 0.05cm;
+    display: inline-block;
+  }
+  .dice-svg {
+    width: 0.9cm;
+    height: 0.9cm;
+  }
+  .dice-svg .dice-rect {
+    fill: #fff;
+    stroke: #000;
+    stroke-width: 3;
+  }
+  .dice-svg circle {
+    fill: #000;
   }
 
   .ordering-numbers {
     margin-bottom: 0.3cm;
   }
-  .ordering-chain {
-    display: flex;
-    align-items: center;
-    gap: 0.2cm;
+  .ordering-table {
+    border-collapse: collapse;
+    width: 100%;
   }
-  .compare-symbol {
-    font-size: 14pt;
+  .ordering-cell {
+    border: 1px solid #000;
+    width: 0.8cm;
+    height: 0.8cm;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 12pt;
+  }
+  .ordering-cell.comparator {
+    width: 0.6cm;
   }
 
   .operation-table-grid {
     display: grid;
     gap: 0.5cm;
+    grid-template-columns: repeat(auto-fit, minmax(6cm, 1fr));
+    align-items: start;
   }
   .operation-table {
     border: 1px solid #000;
     padding: 0.2cm;
   }
-  .operation-label {
+  .operation-symbol {
+    background: #f5f5f5;
     font-weight: bold;
-    margin-bottom: 0.2cm;
   }
 
   .number-line-container {
-    position: relative;
-    height: 5cm;
+    width: 100%;
   }
-  .number-line-track {
-    position: absolute;
-    bottom: 1cm;
-    left: 0;
-    right: 0;
-    height: 2cm;
-    border-bottom: 2px solid #000;
+  .number-line-svg {
+    width: 100%;
+    height: auto;
   }
-  .tick {
-    position: absolute;
-    bottom: 0;
-    text-align: center;
+  .axis-line, .tick-line, .connector-line {
+    stroke: #000;
+    stroke-width: 2;
   }
-  .tick-mark {
-    width: 2px;
-    margin: 0 auto;
-    background: #000;
+  .tick-line.major {
+    stroke-width: 3;
   }
-  .tick.major .tick-mark { height: 1cm; }
-  .tick.minor .tick-mark { height: 0.6cm; }
   .tick-label {
-    margin-top: 0.1cm;
     font-size: 10pt;
+    text-anchor: middle;
   }
-  .number-line-box {
-    position: absolute;
-    bottom: 1.4cm;
-    transform: translateX(-50%);
-    text-align: center;
+  .number-line-rect {
+    fill: #fff;
+    stroke: #000;
+    stroke-width: 2;
   }
-  .number-line-box .connector {
-    width: 2px;
-    height: 0.4cm;
-    background: #000;
-    margin: 0 auto;
+  .number-line-text {
+    font-size: 12pt;
+    text-anchor: middle;
+    dominant-baseline: middle;
   }
 
   .number-dictation {
@@ -199,7 +212,7 @@
 <div class='task'>
   <div class='task-title'>Vergleiche! <, >, =</div>
   <div class='compare-grid cols-3'>
-    <div class='compare-item'><span class='boxed-number'>28</span><span class='compare-circle'></span><span class='boxed-number'>7</span></div><div class='compare-item'><span class='boxed-number'>37</span><span class='compare-circle'></span><span class='boxed-number'>37</span></div><div class='compare-item'><span class='boxed-number'>44</span><span class='compare-circle'></span><span class='boxed-number'>44</span></div><div class='compare-item'><span class='boxed-number'>49</span><span class='compare-circle'></span><span class='boxed-number'>49</span></div><div class='compare-item'><span class='boxed-number'>1</span><span class='compare-circle'></span><span class='boxed-number'>50</span></div><div class='compare-item'><span class='boxed-number'>41</span><span class='compare-circle'></span><span class='boxed-number'>41</span></div><div class='compare-item'><span class='boxed-number'>39</span><span class='compare-circle'></span><span class='boxed-number'>29</span></div><div class='compare-item'><span class='boxed-number'>11</span><span class='compare-circle'></span><span class='boxed-number'>11</span></div><div class='compare-item'><span class='boxed-number'>0</span><span class='compare-circle'></span><span class='boxed-number'>32</span></div>
+    <div class='compare-item'><span class='boxed-number'>28</span><span class='compare-circle'></span><span class='boxed-number'>7</span></div><div class='compare-item'><span class='boxed-number'>37</span><span class='compare-circle'></span><span class='boxed-number'>37</span></div><div class='compare-item'><span class='boxed-number'>44</span><span class='compare-circle'></span><span class='boxed-number'>44</span></div><div class='compare-item'><span class='boxed-number'>49</span><span class='compare-circle'></span><span class='boxed-number'>22</span></div><div class='compare-item'><span class='boxed-number'>1</span><span class='compare-circle'></span><span class='boxed-number'>50</span></div><div class='compare-item'><span class='boxed-number'>41</span><span class='compare-circle'></span><span class='boxed-number'>41</span></div><div class='compare-item'><span class='boxed-number'>39</span><span class='compare-circle'></span><span class='boxed-number'>29</span></div><div class='compare-item'><span class='boxed-number'>11</span><span class='compare-circle'></span><span class='boxed-number'>45</span></div><div class='compare-item'><span class='boxed-number'>0</span><span class='compare-circle'></span><span class='boxed-number'>32</span></div>
   </div>
 </div>
 <div class='task'>
@@ -212,37 +225,35 @@
 <div class='task'>
   <div class='task-title'>Rechne! Achte auf das Rechenzeichen!</div>
   <div class='arithmetic-grid cols-3'>
-    <div class='arithmetic-item'>11 - 8 = <span class='number-box'></span></div><div class='arithmetic-item'>16 - 0 = <span class='number-box'></span></div><div class='arithmetic-item'>0 + 10 = <span class='number-box'></span></div><div class='arithmetic-item'>1 + 2 = <span class='number-box'></span></div><div class='arithmetic-item'>5 - 2 = <span class='number-box'></span></div><div class='arithmetic-item'>4 + 0 = <span class='number-box'></span></div><div class='arithmetic-item'>5 + 8 = <span class='number-box'></span></div><div class='arithmetic-item'>9 + 4 = <span class='number-box'></span></div><div class='arithmetic-item'>18 - 14 = <span class='number-box'></span></div><div class='arithmetic-item'>9 - 8 = <span class='number-box'></span></div><div class='arithmetic-item'>5 + 13 = <span class='number-box'></span></div><div class='arithmetic-item'>20 - 6 = <span class='number-box'></span></div>
+    <div class='arithmetic-item'>15 + 5 = <span class='number-box'></span></div><div class='arithmetic-item'>10 - 2 = <span class='number-box'></span></div><div class='arithmetic-item'>11 - 7 = <span class='number-box'></span></div><div class='arithmetic-item'>14 - 7 = <span class='number-box'></span></div><div class='arithmetic-item'>5 + 7 = <span class='number-box'></span></div><div class='arithmetic-item'>13 - 6 = <span class='number-box'></span></div><div class='arithmetic-item'>3 + 7 = <span class='number-box'></span></div><div class='arithmetic-item'>11 - 3 = <span class='number-box'></span></div><div class='arithmetic-item'>11 - 8 = <span class='number-box'></span></div><div class='arithmetic-item'>4 + 8 = <span class='number-box'></span></div><div class='arithmetic-item'>9 + 6 = <span class='number-box'></span></div><div class='arithmetic-item'>12 - 9 = <span class='number-box'></span></div>
   </div>
 </div>
 <div class='task'>
   <div class='task-title'>Zahlwort – Würfelbild – Zahl</div>
   <table class='simple-table'>
     <thead><tr><th>Zahlwort</th><th>Würfelbild</th><th>Zahl</th></tr></thead>
-    <tbody><tr><td>neunundvierzig</td><td class='dice-cell'><div class='dice-combo'><span class='tallies'><span class='tally'>|||||</span> <span class='tally'>|||||</span> <span class='tally'>|||||</span> <span class='tally'>|||||</span></span> <span class='dice-face'>●●●●●●●●●</span></div></td><td>49</td></tr><tr><td>fünfundfünfzig</td><td class='dice-cell'></td><td></td></tr><tr><td>vierundzwanzig</td><td class='dice-cell'></td><td></td></tr><tr><td>einunddreißig</td><td class='dice-cell'></td><td></td></tr><tr><td>fünfundachtzig</td><td class='dice-cell'></td><td></td></tr><tr><td>fünfundvierzig</td><td class='dice-cell'></td><td></td></tr></tbody>
+    <tbody><tr><td>neunundvierzig</td><td class='dice-cell'><div class='dice-combo'><span class='tallies'><span class='tally'>|||||</span> <span class='tally'>|||||</span> <span class='tally'>|||||</span> <span class='tally'>|||||</span></span><span class='dice-faces'><span class='dice-face'><svg class='dice-svg' viewBox='0 0 100 100' role='img' aria-label='Würfel'><rect x='5' y='5' width='90' height='90' rx='12' ry='12' class='dice-rect' /><circle cx='25' cy='25' r='8' /><circle cx='75' cy='25' r='8' /><circle cx='50' cy='50' r='8' /><circle cx='25' cy='75' r='8' /><circle cx='75' cy='75' r='8' /></svg></span><span class='dice-face'><svg class='dice-svg' viewBox='0 0 100 100' role='img' aria-label='Würfel'><rect x='5' y='5' width='90' height='90' rx='12' ry='12' class='dice-rect' /><circle cx='25' cy='25' r='8' /><circle cx='75' cy='25' r='8' /><circle cx='25' cy='75' r='8' /><circle cx='75' cy='75' r='8' /></svg></span></span></div></td><td>49</td></tr><tr><td>sechsundvierzig</td><td class='dice-cell'></td><td></td></tr><tr><td>achtundsiebzig</td><td class='dice-cell'></td><td></td></tr><tr><td>fünfundzwanzig</td><td class='dice-cell'></td><td></td></tr><tr><td>neunundfünfzig</td><td class='dice-cell'></td><td></td></tr><tr><td>sechsundvierzig</td><td class='dice-cell'></td><td></td></tr></tbody>
   </table>
 </div>
 <div class='task'>
   <div class='task-title'>Ordne! Beginne mit der kleinsten Zahl!</div>
-  <div class='ordering-numbers'>29, 51, 67, 19, 20, 60</div>
-  <div class='ordering-chain'><span class='number-box'></span> <span class='compare-symbol'><</span> <span class='number-box'></span> <span class='compare-symbol'><</span> <span class='number-box'></span> <span class='compare-symbol'><</span> <span class='number-box'></span> <span class='compare-symbol'><</span> <span class='number-box'></span> <span class='compare-symbol'><</span> <span class='number-box'></span></div>
+  <div class='ordering-numbers'>37, 48, 85, 60, 16, 54</div>
+  <table class='ordering-table'><tr><td class='ordering-cell'></td><td class='ordering-cell'></td><td class='ordering-cell comparator'><</td><td class='ordering-cell'></td><td class='ordering-cell'></td><td class='ordering-cell comparator'><</td><td class='ordering-cell'></td><td class='ordering-cell'></td><td class='ordering-cell comparator'><</td><td class='ordering-cell'></td><td class='ordering-cell'></td><td class='ordering-cell comparator'><</td><td class='ordering-cell'></td><td class='ordering-cell'></td><td class='ordering-cell comparator'><</td><td class='ordering-cell'></td><td class='ordering-cell'></td></tr></table>
 </div>
 <div class='task'>
   <div class='task-title'>Achte auf das Rechenzeichen!</div>
   <div class='operation-table-grid'>
     
 <div class='operation-table'>
-  <div class='operation-label'>Rechenart: +</div>
   <table class='simple-table'>
-    <thead><tr><th></th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead>
+    <thead><tr><th class='operation-symbol'>+</th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead>
     <tbody><tr><th>10</th><td>11</td><td></td><td></td><td></td></tr><tr><th>20</th><td></td><td>22</td><td></td><td></td></tr><tr><th>30</th><td></td><td></td><td>33</td><td></td></tr><tr><th>40</th><td></td><td></td><td></td><td>44</td></tr></tbody>
   </table>
 </div>
 <div class='operation-table'>
-  <div class='operation-label'>Rechenart: -</div>
   <table class='simple-table'>
-    <thead><tr><th></th><th>10</th><th>5</th><th>2</th></tr></thead>
-    <tbody><tr><th>50</th><td></td><td>45</td><td></td></tr><tr><th>40</th><td></td><td></td><td>38</td></tr><tr><th>30</th><td></td><td>25</td><td></td></tr><tr><th>20</th><td></td><td></td><td></td></tr></tbody>
+    <thead><tr><th class='operation-symbol'>-</th><th>10</th><th>5</th><th>2</th></tr></thead>
+    <tbody><tr><th>50</th><td></td><td>45</td><td></td></tr><tr><th>40</th><td></td><td>35</td><td></td></tr><tr><th>30</th><td></td><td></td><td></td></tr><tr><th>20</th><td>10</td><td></td><td></td></tr></tbody>
   </table>
 </div>
   </div>
@@ -250,10 +261,10 @@
 <div class='task'>
   <div class='task-title'>Zahlenstrahl</div>
   <div class='number-line-container'>
-    <div class='number-line-track'>
-      <div class='tick major' style='left: 0.0%'><div class='tick-mark'></div><div class='tick-label'>0</div></div><div class='tick minor' style='left: 1.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 2.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 3.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 4.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 5.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 6.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 7.000000000000001%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 8.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 9.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick major' style='left: 10.0%'><div class='tick-mark'></div><div class='tick-label'>10</div></div><div class='tick minor' style='left: 11.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 12.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 13.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 14.000000000000002%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 15.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 16.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 17.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 18.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 19.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick major' style='left: 20.0%'><div class='tick-mark'></div><div class='tick-label'>20</div></div><div class='tick minor' style='left: 21.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 22.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 23.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 24.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 25.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 26.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 27.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 28.000000000000004%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 28.999999999999996%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick major' style='left: 30.0%'><div class='tick-mark'></div><div class='tick-label'>30</div></div><div class='tick minor' style='left: 31.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 32.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 33.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 34.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 35.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 36.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 37.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 38.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 39.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick major' style='left: 40.0%'><div class='tick-mark'></div><div class='tick-label'>40</div></div><div class='tick minor' style='left: 41.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 42.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 43.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 44.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 45.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 46.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 47.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 48.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 49.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick major' style='left: 50.0%'><div class='tick-mark'></div><div class='tick-label'>50</div></div><div class='tick minor' style='left: 51.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 52.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 53.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 54.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 55.00000000000001%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 56.00000000000001%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 56.99999999999999%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 57.99999999999999%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 59.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick major' style='left: 60.0%'><div class='tick-mark'></div><div class='tick-label'>60</div></div><div class='tick minor' style='left: 61.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 62.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 63.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 64.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 65.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 66.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 67.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 68.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 69.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick major' style='left: 70.0%'><div class='tick-mark'></div><div class='tick-label'>70</div></div><div class='tick minor' style='left: 71.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 72.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 73.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 74.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 75.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 76.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 77.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 78.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 79.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick major' style='left: 80.0%'><div class='tick-mark'></div><div class='tick-label'>80</div></div><div class='tick minor' style='left: 81.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 82.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 83.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 84.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 85.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 86.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 87.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 88.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 89.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick major' style='left: 90.0%'><div class='tick-mark'></div><div class='tick-label'>90</div></div><div class='tick minor' style='left: 91.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 92.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 93.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 94.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 95.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 96.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 97.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 98.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 99.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick major' style='left: 100.0%'><div class='tick-mark'></div><div class='tick-label'>100</div></div>
-      <div class='number-line-box' style='left: 15.0%'><span class='number-box'></span><div class='connector'></div></div><div class='number-line-box' style='left: 37.0%'><span class='number-box'></span><div class='connector'></div></div><div class='number-line-box' style='left: 52.0%'><span class='number-box'></span><div class='connector'></div></div><div class='number-line-box' style='left: 78.0%'><span class='number-box'></span><div class='connector'></div></div>
-    </div>
+    <svg class='number-line-svg' viewBox='0 0 1000 220' preserveAspectRatio='none'>
+      <line x1='50' y1='170' x2='950' y2='170' class='axis-line' />
+      <line x1='50.00' y1='170' x2='50.00' y2='130' class='tick-line major' /><text x='50.00' y='112' class='tick-label'>0</text><line x1='59.00' y1='170' x2='59.00' y2='146' class='tick-line' /><line x1='68.00' y1='170' x2='68.00' y2='146' class='tick-line' /><line x1='77.00' y1='170' x2='77.00' y2='146' class='tick-line' /><line x1='86.00' y1='170' x2='86.00' y2='146' class='tick-line' /><line x1='95.00' y1='170' x2='95.00' y2='146' class='tick-line' /><line x1='104.00' y1='170' x2='104.00' y2='146' class='tick-line' /><line x1='113.00' y1='170' x2='113.00' y2='146' class='tick-line' /><line x1='122.00' y1='170' x2='122.00' y2='146' class='tick-line' /><line x1='131.00' y1='170' x2='131.00' y2='146' class='tick-line' /><line x1='140.00' y1='170' x2='140.00' y2='130' class='tick-line major' /><text x='140.00' y='112' class='tick-label'>10</text><line x1='149.00' y1='170' x2='149.00' y2='146' class='tick-line' /><line x1='158.00' y1='170' x2='158.00' y2='146' class='tick-line' /><line x1='167.00' y1='170' x2='167.00' y2='146' class='tick-line' /><line x1='176.00' y1='170' x2='176.00' y2='146' class='tick-line' /><line x1='185.00' y1='170' x2='185.00' y2='146' class='tick-line' /><line x1='194.00' y1='170' x2='194.00' y2='146' class='tick-line' /><line x1='203.00' y1='170' x2='203.00' y2='146' class='tick-line' /><line x1='212.00' y1='170' x2='212.00' y2='146' class='tick-line' /><line x1='221.00' y1='170' x2='221.00' y2='146' class='tick-line' /><line x1='230.00' y1='170' x2='230.00' y2='130' class='tick-line major' /><text x='230.00' y='112' class='tick-label'>20</text><line x1='239.00' y1='170' x2='239.00' y2='146' class='tick-line' /><line x1='248.00' y1='170' x2='248.00' y2='146' class='tick-line' /><line x1='257.00' y1='170' x2='257.00' y2='146' class='tick-line' /><line x1='266.00' y1='170' x2='266.00' y2='146' class='tick-line' /><line x1='275.00' y1='170' x2='275.00' y2='146' class='tick-line' /><line x1='284.00' y1='170' x2='284.00' y2='146' class='tick-line' /><line x1='293.00' y1='170' x2='293.00' y2='146' class='tick-line' /><line x1='302.00' y1='170' x2='302.00' y2='146' class='tick-line' /><line x1='311.00' y1='170' x2='311.00' y2='146' class='tick-line' /><line x1='320.00' y1='170' x2='320.00' y2='130' class='tick-line major' /><text x='320.00' y='112' class='tick-label'>30</text><line x1='329.00' y1='170' x2='329.00' y2='146' class='tick-line' /><line x1='338.00' y1='170' x2='338.00' y2='146' class='tick-line' /><line x1='347.00' y1='170' x2='347.00' y2='146' class='tick-line' /><line x1='356.00' y1='170' x2='356.00' y2='146' class='tick-line' /><line x1='365.00' y1='170' x2='365.00' y2='146' class='tick-line' /><line x1='374.00' y1='170' x2='374.00' y2='146' class='tick-line' /><line x1='383.00' y1='170' x2='383.00' y2='146' class='tick-line' /><line x1='392.00' y1='170' x2='392.00' y2='146' class='tick-line' /><line x1='401.00' y1='170' x2='401.00' y2='146' class='tick-line' /><line x1='410.00' y1='170' x2='410.00' y2='130' class='tick-line major' /><text x='410.00' y='112' class='tick-label'>40</text><line x1='419.00' y1='170' x2='419.00' y2='146' class='tick-line' /><line x1='428.00' y1='170' x2='428.00' y2='146' class='tick-line' /><line x1='437.00' y1='170' x2='437.00' y2='146' class='tick-line' /><line x1='446.00' y1='170' x2='446.00' y2='146' class='tick-line' /><line x1='455.00' y1='170' x2='455.00' y2='146' class='tick-line' /><line x1='464.00' y1='170' x2='464.00' y2='146' class='tick-line' /><line x1='473.00' y1='170' x2='473.00' y2='146' class='tick-line' /><line x1='482.00' y1='170' x2='482.00' y2='146' class='tick-line' /><line x1='491.00' y1='170' x2='491.00' y2='146' class='tick-line' /><line x1='500.00' y1='170' x2='500.00' y2='130' class='tick-line major' /><text x='500.00' y='112' class='tick-label'>50</text><line x1='509.00' y1='170' x2='509.00' y2='146' class='tick-line' /><line x1='518.00' y1='170' x2='518.00' y2='146' class='tick-line' /><line x1='527.00' y1='170' x2='527.00' y2='146' class='tick-line' /><line x1='536.00' y1='170' x2='536.00' y2='146' class='tick-line' /><line x1='545.00' y1='170' x2='545.00' y2='146' class='tick-line' /><line x1='554.00' y1='170' x2='554.00' y2='146' class='tick-line' /><line x1='563.00' y1='170' x2='563.00' y2='146' class='tick-line' /><line x1='572.00' y1='170' x2='572.00' y2='146' class='tick-line' /><line x1='581.00' y1='170' x2='581.00' y2='146' class='tick-line' /><line x1='590.00' y1='170' x2='590.00' y2='130' class='tick-line major' /><text x='590.00' y='112' class='tick-label'>60</text><line x1='599.00' y1='170' x2='599.00' y2='146' class='tick-line' /><line x1='608.00' y1='170' x2='608.00' y2='146' class='tick-line' /><line x1='617.00' y1='170' x2='617.00' y2='146' class='tick-line' /><line x1='626.00' y1='170' x2='626.00' y2='146' class='tick-line' /><line x1='635.00' y1='170' x2='635.00' y2='146' class='tick-line' /><line x1='644.00' y1='170' x2='644.00' y2='146' class='tick-line' /><line x1='653.00' y1='170' x2='653.00' y2='146' class='tick-line' /><line x1='662.00' y1='170' x2='662.00' y2='146' class='tick-line' /><line x1='671.00' y1='170' x2='671.00' y2='146' class='tick-line' /><line x1='680.00' y1='170' x2='680.00' y2='130' class='tick-line major' /><text x='680.00' y='112' class='tick-label'>70</text><line x1='689.00' y1='170' x2='689.00' y2='146' class='tick-line' /><line x1='698.00' y1='170' x2='698.00' y2='146' class='tick-line' /><line x1='707.00' y1='170' x2='707.00' y2='146' class='tick-line' /><line x1='716.00' y1='170' x2='716.00' y2='146' class='tick-line' /><line x1='725.00' y1='170' x2='725.00' y2='146' class='tick-line' /><line x1='734.00' y1='170' x2='734.00' y2='146' class='tick-line' /><line x1='743.00' y1='170' x2='743.00' y2='146' class='tick-line' /><line x1='752.00' y1='170' x2='752.00' y2='146' class='tick-line' /><line x1='761.00' y1='170' x2='761.00' y2='146' class='tick-line' /><line x1='770.00' y1='170' x2='770.00' y2='130' class='tick-line major' /><text x='770.00' y='112' class='tick-label'>80</text><line x1='779.00' y1='170' x2='779.00' y2='146' class='tick-line' /><line x1='788.00' y1='170' x2='788.00' y2='146' class='tick-line' /><line x1='797.00' y1='170' x2='797.00' y2='146' class='tick-line' /><line x1='806.00' y1='170' x2='806.00' y2='146' class='tick-line' /><line x1='815.00' y1='170' x2='815.00' y2='146' class='tick-line' /><line x1='824.00' y1='170' x2='824.00' y2='146' class='tick-line' /><line x1='833.00' y1='170' x2='833.00' y2='146' class='tick-line' /><line x1='842.00' y1='170' x2='842.00' y2='146' class='tick-line' /><line x1='851.00' y1='170' x2='851.00' y2='146' class='tick-line' /><line x1='860.00' y1='170' x2='860.00' y2='130' class='tick-line major' /><text x='860.00' y='112' class='tick-label'>90</text><line x1='869.00' y1='170' x2='869.00' y2='146' class='tick-line' /><line x1='878.00' y1='170' x2='878.00' y2='146' class='tick-line' /><line x1='887.00' y1='170' x2='887.00' y2='146' class='tick-line' /><line x1='896.00' y1='170' x2='896.00' y2='146' class='tick-line' /><line x1='905.00' y1='170' x2='905.00' y2='146' class='tick-line' /><line x1='914.00' y1='170' x2='914.00' y2='146' class='tick-line' /><line x1='923.00' y1='170' x2='923.00' y2='146' class='tick-line' /><line x1='932.00' y1='170' x2='932.00' y2='146' class='tick-line' /><line x1='941.00' y1='170' x2='941.00' y2='146' class='tick-line' /><line x1='950.00' y1='170' x2='950.00' y2='130' class='tick-line major' /><text x='950.00' y='112' class='tick-label'>100</text><line x1='230.00' y1='66' x2='185.00' y2='170' class='connector-line' /><rect x='195.00' y='30' width='70' height='36' rx='4' class='number-line-rect' /><text x='230.00' y='53.00' class='number-line-text'></text><line x1='410.00' y1='66' x2='383.00' y2='170' class='connector-line' /><rect x='375.00' y='30' width='70' height='36' rx='4' class='number-line-rect' /><text x='410.00' y='53.00' class='number-line-text'></text><line x1='590.00' y1='66' x2='518.00' y2='170' class='connector-line' /><rect x='555.00' y='30' width='70' height='36' rx='4' class='number-line-rect' /><text x='590.00' y='53.00' class='number-line-text'></text><line x1='770.00' y1='66' x2='752.00' y2='170' class='connector-line' /><rect x='735.00' y='30' width='70' height='36' rx='4' class='number-line-rect' /><text x='770.00' y='53.00' class='number-line-text'></text>
+    </svg>
   </div>
 </div>
   </div>
