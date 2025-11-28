@@ -19,11 +19,11 @@ Erzeugung von einzelnen HTML-Arbeitsblättern (inkl. Lösungsblatt) für Grundsc
   - `arithmetic_list`: `item_count`, `operations` (`+`/`-`), `min_value`, `max_value`, `allow_negative_results`, `columns`, `title`.
   - `number_word_table`: `first_row_example` (Bool, fügt über `example_number` eine komplett ausgefüllte Beispielzeile hinzu), `row_count` (Anzahl Übungszeilen **exklusive** Beispiel), `min_value`, `max_value`, `given_columns` (Spalten, die im Aufgabenblatt gefüllt sind), `title`.
   - `ordering`: `set_size`, `min_value`, `max_value`, `order` (`increasing`/`decreasing`), `show_comparison_symbols`, `title`.
-  - `operation_table`: `result_range` (`min`, `max` Pflicht), `tables` (Liste mit `operation`, `row_headers`, `col_headers`, `given_cells`), `title`.
-    - `row_headers`/`col_headers` können als Liste ganzer Zahlen oder als Objekt `{ start, end, step }` angegeben werden.
+  - `operation_table`: `result_range` (`min`, `max` Pflicht), `tables` (Liste mit `operation`, `row_count`, `col_count`, `given_cells`), `title`.
+    - Zeilen- und Spaltenköpfe werden beim Generieren aus Vielfachen von 10 (0–100) gezogen; Standardanzahl pro Richtung ist 2, wenn nichts angegeben ist.
     - `given_cells`: `none`, `diagonal`, `random_<n>` oder explizite Koordinatenliste.
-    - Ergebnisse außerhalb `result_range` führen zu einem Konfigurationsfehler.
-  - `number_line`: `start`, `end`, `major_tick_interval`, optionale `values` (Liste; ohne Angabe werden fünf Werte außerhalb der Major-Ticks gewählt), `title`.
+    - Ergebnisse außerhalb `result_range`, Summen über 100 oder Differenzen unter 0 führen zu einem Fehler.
+  - `number_line`: `start`, `end`, `major_tick_interval`, `value_count` (Anzahl zu platzierender Zahlen; Standard 5, Zufallsauswahl außerhalb der Major-Ticks), optional `values`, `title`.
 
 ## Layout-Vorgaben
 - Jede HTML-Datei enthält genau ein Arbeitsblatt mit optionale `page-break-after: always;`.
@@ -67,13 +67,15 @@ Jeder Typ hat einen `type`-Bezeichner und eigene Parameter. Standardregeln: Aufg
 
 7. **Rechentabellen (`operation_table`)**
    - Instruktion: "Achte auf das Rechenzeichen!".
-   - Parameter: `tables` (Liste mit `operation`, `row_headers`, `col_headers`, `given_cells` z. B. `none`, `diagonal`, `random_3`), `result_range` { `min`, `max` } als Pflicht, optional `step` (Default 1, häufig 10).
+   - Parameter: `tables` (Liste mit `operation`, `row_count`, `col_count`, `given_cells` z. B. `none`, `diagonal`, `random_3`), `result_range` { `min`, `max` } als Pflicht, optional globale Default-Anzahl `row_count`/`col_count`.
+   - Zeilen- und Spaltenköpfe werden zufällig aus Zehnerzahlen 0–100 gezogen. Plus-Ergebnisse dürfen 100 nicht überschreiten, Minus-Ergebnisse nicht negativ sein; Verstöße führen zu einem Fehler.
    - Aufgaben außerhalb des Ergebnisbereichs verwerfen und neu ziehen.
    - Lösungsblatt füllt **alle** Felder der Tabelle vollständig aus, unabhängig davon, ob sie im Aufgabenblatt leer waren.
 
 8. **Zahlenstrahl (`number_line`)**
    - Geschlossener Wertebereich (z. B. 0–100) mit Tickmarks für jede ganze Zahl.
    - Hauptticks (z. B. Vielfache von 10) länger/markiert; Nebenticks kürzer.
+   - Parameter: `value_count` (Standard 5, wählt Zufallszahlen außerhalb der Hauptticks), optional explizite `values`.
    - Kästchen und Verbindungslinien für Platzierung der Zahlen.
    - Default-Werte: `start = 0`, `end = 100`, `major_tick_interval = 10` (Hauptticks auf Vielfachen von 10).
 

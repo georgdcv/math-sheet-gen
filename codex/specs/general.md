@@ -95,12 +95,15 @@ Jeder Aufgabentyp erhält einen internen `type`-Bezeichner.
      * `tables`: Liste von Tabellen, jede mit:
 
        * `operation`: `"+"` oder `"-"`.
-       * `row_headers`: Liste von Zahlen.
-       * `col_headers`: Liste von Zahlen.
+       * `row_count`: Anzahl der Zeilen (Standard 2, wenn nicht gesetzt).
+       * `col_count`: Anzahl der Spalten (Standard 2, wenn nicht gesetzt).
        * `given_cells`: Regellogik, z. B. `"none"`, `"diagonal"`, `"random_3"`.
 
+     * Zeilen- und Spaltenköpfe werden zufällig als Vielfache von 10 aus dem Bereich 0–100 gewählt.
+
+     * Plus-Ergebnisse dürfen 100 nicht überschreiten; Minus-Ergebnisse dürfen nicht negativ werden.
+
      * `result_range`: Pflichtfeld zum Begrenzen der Ergebnisse, z. B. `{ min: 0, max: 100 }`; Aufgaben, die außerhalb liegen, werden verworfen/neu gezogen.
-     * `step`: Zahlenschritt für Header-Werte, standardmäßig `1`, alternativ häufig `10`; weitere Optionen können später ergänzt werden.
 
 8. **Zahlenstrahl (`number_line`)**
 
@@ -109,6 +112,11 @@ Zahlenstrahl: Kästchen und Verbindungslinien
 Der Zahlenstrahl bildet einen geschlossenen Wertebereich (z. B. 0–100) mit Tickmarken für jede ganze Zahl.
 
 Hauptticks (z. B. Vielfache von 10) sind länger/gekennzeichnet.
+
+Aktuelle Konfiguration:
+
+* `start`, `end`, `major_tick_interval` steuern den Bereich und die Hauptticks.
+* `value_count` legt fest, wie viele zufällige Zahlen (außerhalb der Hauptticks) beschriftet werden; `values` kann optional explizite Werte liefern.
 
 Nebenticks (z. B. alle übrigen ganzen Zahlen) sind kürzer.
 

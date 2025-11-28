@@ -491,6 +491,49 @@ def _enforce_tens_headers(headers: List[int]) -> List[int]:
     return enforced
 
 
+def _generate_random_headers(
+    operation: str,
+    row_count: int,
+    col_count: int,
+    rng: random.Random,
+    min_result: int,
+    max_result: int,
+) -> Tuple[List[int], List[int]]:
+    possible_values = list(range(0, 101, 10))
+
+    def pick_values(count: int) -> List[int]:
+        if count <= len(possible_values):
+            return rng.sample(possible_values, count)
+        choices = [rng.choice(possible_values) for _ in range(count)]
+        rng.shuffle(choices)
+        return choices
+
+    for _ in range(1000):
+        rows = pick_values(row_count)
+        cols = pick_values(col_count)
+
+        valid = True
+        for r in rows:
+            for c in cols:
+                result = r + c if operation == "+" else r - c
+                if operation == "+" and result > 100:
+                    valid = False
+                    break
+                if operation == "-" and result < 0:
+                    valid = False
+                    break
+                if result < min_result or result > max_result:
+                    valid = False
+                    break
+            if not valid:
+                break
+
+        if valid:
+            return rows, cols
+
+    raise ValueError("Unable to generate headers that satisfy all constraints")
+
+
 def generate_operation_table(data: Dict, rng: random.Random) -> Dict:
     result_range = data.get("result_range")
     if not result_range or "min" not in result_range or "max" not in result_range:
@@ -498,6 +541,8 @@ def generate_operation_table(data: Dict, rng: random.Random) -> Dict:
     min_result = int(result_range["min"])
     max_result = int(result_range["max"])
     default_step = int(data.get("header_step", data.get("step", 1)))
+    default_row_count = int(data.get("row_count", 2))
+    default_col_count = int(data.get("col_count", 2))
     provided_tables = data.get("tables", [])
     if not provided_tables:
         provided_tables = [
@@ -510,23 +555,30 @@ def generate_operation_table(data: Dict, rng: random.Random) -> Dict:
         operation = table.get("operation", "+")
         row_step = int(table.get("row_step", table.get("step", default_step)))
         col_step = int(table.get("col_step", table.get("step", default_step)))
+        row_count = int(table.get("row_count", default_row_count))
+        col_count = int(table.get("col_count", default_col_count))
 
         row_headers_source = table.get("row_headers")
         col_headers_source = table.get("col_headers")
-        if not row_headers_source:
-            row_headers_source = [0, row_step]
-        if not col_headers_source:
-            col_headers_source = [0, col_step]
+        if row_headers_source is None and col_headers_source is None:
+            row_headers, col_headers = _generate_random_headers(
+                operation, row_count, col_count, rng, min_result, max_result
+            )
+        else:
+            if not row_headers_source:
+                row_headers_source = [0, row_step]
+            if not col_headers_source:
+                col_headers_source = [0, col_step]
 
-        if isinstance(row_headers_source, dict) and "step" not in row_headers_source:
-            row_headers_source = {**row_headers_source, "step": row_step}
-        if isinstance(col_headers_source, dict) and "step" not in col_headers_source:
-            col_headers_source = {**col_headers_source, "step": col_step}
+            if isinstance(row_headers_source, dict) and "step" not in row_headers_source:
+                row_headers_source = {**row_headers_source, "step": row_step}
+            if isinstance(col_headers_source, dict) and "step" not in col_headers_source:
+                col_headers_source = {**col_headers_source, "step": col_step}
 
-        row_headers = _enforce_tens_headers(parse_header_sequence(row_headers_source))
-        col_headers = _enforce_tens_headers(parse_header_sequence(col_headers_source))
-        if not row_headers or not col_headers:
-            raise ValueError("Row and column headers must contain at least one value")
+            row_headers = _enforce_tens_headers(parse_header_sequence(row_headers_source))
+            col_headers = _enforce_tens_headers(parse_header_sequence(col_headers_source))
+            if not row_headers or not col_headers:
+                raise ValueError("Row and column headers must contain at least one value")
         given_cells = table.get("given_cells", "none")
 
         # validate results
@@ -538,6 +590,14 @@ def generate_operation_table(data: Dict, rng: random.Random) -> Dict:
                 if result < min_result or result > max_result:
                     raise ValueError(
                         f"Result {result} outside allowed range [{min_result}, {max_result}] for {r} {operation} {c}"
+                    )
+                if operation == "+" and result > 100:
+                    raise ValueError(
+                        f"Result {result} is above the allowed maximum of 100 for {r} {operation} {c}"
+                    )
+                if operation == "-" and result < 0:
+                    raise ValueError(
+                        f"Result {result} is below the allowed minimum of 0 for {r} {operation} {c}"
                     )
                 row.append(result)
             results.append(row)
@@ -576,18 +636,15 @@ def generate_number_line(data: Dict, rng: random.Random) -> Dict:
     start = int(data.get("start", 0))
     end = int(data.get("end", 100))
     major_tick = max(1, int(data.get("major_tick_interval", 10)))
-    values = data.get("values")
-    if values is None:
-        values = []
-        possible_numbers = list(range(start, end + 1))
-        rng.shuffle(possible_numbers)
-        for number in possible_numbers:
-            if len(values) >= 5:
-                break
-            if number % major_tick != 0:
-                values.append(number)
-        values.sort()
-    values = [int(v) for v in values]
+    explicit_values = data.get("values")
+    value_count = int(data.get("value_count", data.get("values_count", 5)))
+    if explicit_values is None:
+        possible_numbers = [number for number in range(start, end + 1) if number % major_tick != 0]
+        if value_count > len(possible_numbers):
+            raise ValueError("Not enough non-major numbers available for number line values")
+        values = sorted(rng.sample(possible_numbers, value_count))
+    else:
+        values = [int(v) for v in explicit_values]
     return {
         "title": data.get(
             "title", "Trage zuerst die Zehnerzahlen an den Zahlenstrahl. Trage dann die Zahlen ein."
@@ -801,13 +858,35 @@ def render_number_line(data: Dict, solution: bool) -> str:
 
     value_elements = []
     if data["values"]:
-        spacing = usable_width / (len(data["values"]) + 1)
         box_width = 70
         box_height = 36
         box_y = 24
-        for idx, value in enumerate(data["values"]):
-            box_center_x = left_margin + spacing * (idx + 1)
+        min_gap = 12
+        max_offset = 40
+
+        placements: List[Tuple[int, float, float]] = []
+        previous_right = left_margin - min_gap
+
+        for value in sorted(data["values"]):
             tick_x = left_margin + ((value - start) / total_range) * usable_width
+            desired_center = tick_x
+            min_center = previous_right + box_width / 2 + min_gap
+            box_center_x = max(desired_center, min_center)
+
+            if abs(box_center_x - desired_center) > max_offset:
+                direction = 1 if box_center_x > desired_center else -1
+                box_center_x = desired_center + direction * max_offset
+                box_center_x = max(box_center_x, min_center)
+
+            box_center_x = min(
+                max(box_center_x, left_margin + box_width / 2),
+                width - right_margin - box_width / 2,
+            )
+
+            placements.append((value, box_center_x, tick_x))
+            previous_right = box_center_x + box_width / 2
+
+        for value, box_center_x, tick_x in placements:
             tick_target_y = tick_tops.get(value, axis_y - tick_height_minor / 2)
             value_elements.append(
                 f"<line x1='{box_center_x:.2f}' y1='{box_y + box_height}' x2='{tick_x:.2f}' y2='{tick_target_y:.2f}' class='connector-line' />"

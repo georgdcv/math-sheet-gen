@@ -52,21 +52,15 @@ worksheet:
         max: 100
       tables:
         - operation: "+"
-          row_headers:
-            start: 10
-            end: 40
-            step: 10
-          col_headers:
-            start: 10
-            end: 40
-            step: 10
+          row_count: 4
+          col_count: 4
           given_cells: diagonal
         - operation: "-"
-          row_headers: [50, 40, 30, 20]
-          col_headers: [20, 10]
+          row_count: 4
+          col_count: 2
           given_cells: random_3
     - type: number_line
       start: 0
       end: 100
       major_tick_interval: 10
-      values: [15, 37, 52, 78]
+      value_count: 4
