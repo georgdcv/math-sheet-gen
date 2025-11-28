@@ -158,7 +158,7 @@ def generate_compare_numbers(data: Dict, rng: random.Random) -> Dict:
     min_value = int(data.get("min_value", 0))
     max_value = int(data.get("max_value", 20))
     columns = int(data.get("columns", 3))
-    equal_probability = float(data.get("equal_probability", 0.2))
+    equal_probability = max(0.0, min(1.0, float(data.get("equal_probability", 0.05))))
 
     items = []
     for _ in range(item_count):
@@ -222,19 +222,48 @@ def generate_arithmetic_list(data: Dict, rng: random.Random) -> Dict:
     max_value = int(data.get("max_value", 20))
     allow_negative = bool(data.get("allow_negative_results", False))
     columns = int(data.get("columns", 2))
+    cross_ten_probability = max(0.0, min(1.0, float(data.get("cross_ten_probability", 1.0))))
+    max_second_operand = max(min_value, max(0, min(int(data.get("max_second_operand", 10)), max_value)))
 
-    items = []
+    def is_crossing_ten_add(x: int, y: int) -> bool:
+        return (x % 10) + (y % 10) >= 10
+
+    def is_crossing_ten_subtract(x: int, y: int) -> bool:
+        return (x % 10) < (y % 10)
+
+    def generate_candidate(op_symbol: str, require_cross: bool) -> Optional[Tuple[int, int, int]]:
+        max_attempts = 500
+        for _ in range(max_attempts):
+            a = rng.randint(min_value, max_value)
+            b = rng.randint(min_value, max_second_operand)
+            result = a + b if op_symbol == "+" else a - b
+
+            if not allow_negative and result < 0:
+                continue
+            if result < min_value or result > max_value:
+                continue
+
+            crossing = is_crossing_ten_add(a, b) if op_symbol == "+" else is_crossing_ten_subtract(a, b)
+            if require_cross and not crossing:
+                continue
+            if not require_cross and crossing:
+                continue
+            return a, b, result
+        return None
+
+    items: List[Tuple[int, str, int, int]] = []
     while len(items) < item_count:
         op = rng.choice(operations)
-        a = rng.randint(min_value, max_value)
-        b = rng.randint(min_value, max_value)
-        result = a + b if op == "+" else a - b
+        wants_cross = rng.random() < cross_ten_probability
+        candidate = generate_candidate(op, wants_cross)
 
-        if not allow_negative and result < 0:
-            continue
-        if result < min_value or result > max_value:
-            continue
+        if candidate is None:
+            # try the opposite crossing requirement to avoid getting stuck
+            candidate = generate_candidate(op, not wants_cross)
+        if candidate is None:
+            raise ValueError("Unable to generate arithmetic item with given constraints")
 
+        a, b, result = candidate
         items.append((a, op, b, result))
 
     return {
@@ -291,22 +320,48 @@ def number_to_word(value: int) -> str:
     return f"{GERMAN_UNDER_20[ones]}und{TENS[tens]}"
 
 
+def _dice_svg(face_value: int) -> str:
+    pip_positions = {
+        1: [(50, 50)],
+        2: [(25, 25), (75, 75)],
+        3: [(25, 25), (50, 50), (75, 75)],
+        4: [(25, 25), (75, 25), (25, 75), (75, 75)],
+        5: [(25, 25), (75, 25), (50, 50), (25, 75), (75, 75)],
+    }
+    circles = "".join(
+        f"<circle cx='{x}' cy='{y}' r='8' />" for x, y in pip_positions.get(face_value, [])
+    )
+    return (
+        "<svg class='dice-svg' viewBox='0 0 100 100' role='img' aria-label='Würfel'>"
+        "<rect x='5' y='5' width='90' height='90' rx='12' ry='12' class='dice-rect' />"
+        f"{circles}</svg>"
+    )
+
+
+def _ones_as_dice_faces(ones: int) -> List[str]:
+    faces: List[str] = []
+    while ones >= 5:
+        faces.append(_dice_svg(5))
+        ones -= 5
+    if ones:
+        faces.append(_dice_svg(ones))
+    return faces
+
+
 def dice_representation(value: int) -> str:
     tens = value // 10
     ones = value % 10
-    tally_groups = []
-    for _ in range(tens):
-        tally_groups.append("|||||")
-    ones_dice = []
-    for _ in range(ones):
-        ones_dice.append("●")
+    tally_groups = ["|||||"] * tens
+    dice_faces = _ones_as_dice_faces(ones)
+
     tally_html = " ".join(f"<span class='tally'>{group}</span>" for group in tally_groups)
-    ones_html = "".join(ones_dice)
-    if tally_html and ones_html:
-        return f"<div class='dice-combo'><span class='tallies'>{tally_html}</span> <span class='dice-face'>{ones_html}</span></div>"
+    dice_html = "".join(f"<span class='dice-face'>{face}</span>" for face in dice_faces)
+
+    if tally_html and dice_html:
+        return f"<div class='dice-combo'><span class='tallies'>{tally_html}</span><span class='dice-faces'>{dice_html}</span></div>"
     if tally_html:
         return f"<div class='dice-combo'><span class='tallies'>{tally_html}</span></div>"
-    return f"<div class='dice-combo'><span class='dice-face'>{ones_html}</span></div>"
+    return f"<div class='dice-combo'><span class='dice-faces'>{dice_html}</span></div>"
 
 
 def generate_number_word_table(data: Dict, rng: random.Random) -> Dict:
@@ -384,17 +439,39 @@ def parse_header_sequence(values: Sequence[int] | Dict[str, int]) -> List[int]:
 
 
 def generate_operation_table(data: Dict, rng: random.Random) -> Dict:
-    tables_data = []
     result_range = data.get("result_range")
     if not result_range or "min" not in result_range or "max" not in result_range:
         raise ValueError("result_range with min and max is required for operation_table")
     min_result = int(result_range["min"])
     max_result = int(result_range["max"])
+    default_step = int(data.get("header_step", data.get("step", 1)))
+    provided_tables = data.get("tables", [])
+    if not provided_tables:
+        provided_tables = [
+            {"operation": "+", "row_headers": [0, default_step], "col_headers": [0, default_step], "given_cells": "none"},
+            {"operation": "-", "row_headers": [0, default_step], "col_headers": [0, default_step], "given_cells": "none"},
+        ]
 
-    for table in data.get("tables", []):
+    tables_data = []
+    for table in provided_tables:
         operation = table.get("operation", "+")
-        row_headers = parse_header_sequence(table.get("row_headers", []))
-        col_headers = parse_header_sequence(table.get("col_headers", []))
+        row_step = int(table.get("row_step", table.get("step", default_step)))
+        col_step = int(table.get("col_step", table.get("step", default_step)))
+
+        row_headers_source = table.get("row_headers")
+        col_headers_source = table.get("col_headers")
+        if not row_headers_source:
+            row_headers_source = [0, row_step]
+        if not col_headers_source:
+            col_headers_source = [0, col_step]
+
+        if isinstance(row_headers_source, dict) and "step" not in row_headers_source:
+            row_headers_source = {**row_headers_source, "step": row_step}
+        if isinstance(col_headers_source, dict) and "step" not in col_headers_source:
+            col_headers_source = {**col_headers_source, "step": col_step}
+
+        row_headers = parse_header_sequence(row_headers_source)
+        col_headers = parse_header_sequence(col_headers_source)
         given_cells = table.get("given_cells", "none")
 
         # validate results
@@ -443,7 +520,7 @@ def generate_operation_table(data: Dict, rng: random.Random) -> Dict:
 def generate_number_line(data: Dict, rng: random.Random) -> Dict:
     start = int(data.get("start", 0))
     end = int(data.get("end", 100))
-    major_tick = int(data.get("major_tick_interval", 10))
+    major_tick = max(1, int(data.get("major_tick_interval", 10)))
     values = data.get("values")
     if values is None:
         values = []
@@ -571,22 +648,36 @@ def render_number_word_table(data: Dict, solution: bool) -> str:
 
 def render_ordering(data: Dict, solution: bool) -> str:
     numbers_str = ", ".join(str(n) for n in data["numbers"])
-    ordered_strs = [str(n) if solution else "" for n in data["sorted_numbers"]]
-    separators = " <span class='compare-symbol'>{}</span> ".format("<" if data["order"] == "increasing" else ">")
-    chain_content = separators.join(f"<span class='number-box'>{text}</span>" for text in ordered_strs)
-    if not data["show_symbols"]:
-        chain_content = "".join(f"<span class='number-box'>{text}</span>" for text in ordered_strs)
+    comparison_symbol = "<" if data["order"] == "increasing" else ">"
+
+    def cells_for_number(chars: List[str]) -> List[str]:
+        return [f"<td class='ordering-cell'>{digit}</td>" for digit in chars]
+
+    def cells_for_comparator() -> str:
+        symbol = comparison_symbol if data["show_symbols"] else ""
+        return f"<td class='ordering-cell comparator'>{symbol}</td>"
+
+    row_cells: List[str] = []
+    for idx, value in enumerate(data["sorted_numbers"]):
+        digits = list(str(value)) if solution else ["" for _ in str(value)]
+        row_cells.extend(cells_for_number(digits))
+        if idx < len(data["sorted_numbers"]) - 1:
+            row_cells.append(cells_for_comparator())
+
+    table_html = f"<table class='ordering-table'><tr>{''.join(row_cells)}</tr></table>"
     return f"""<div class='task'>
   <div class='task-title'>{data['title']}</div>
   <div class='ordering-numbers'>{numbers_str}</div>
-  <div class='ordering-chain'>{chain_content}</div>
+  {table_html}
 </div>"""
 
 
 def render_operation_table(data: Dict, solution: bool) -> str:
     tables_html = []
     for table in data["tables"]:
-        header_cells = "<th></th>" + "".join(f"<th>{c}</th>" for c in table["col_headers"])
+        header_cells = f"<th class='operation-symbol'>{table['operation']}</th>" + "".join(
+            f"<th>{c}</th>" for c in table["col_headers"]
+        )
         body_rows = []
         for r_idx, row_header in enumerate(table["row_headers"]):
             cells = [f"<th>{row_header}</th>"]
@@ -597,7 +688,6 @@ def render_operation_table(data: Dict, solution: bool) -> str:
         tables_html.append(
             f"""
 <div class='operation-table'>
-  <div class='operation-label'>Rechenart: {table['operation']}</div>
   <table class='simple-table'>
     <thead><tr>{header_cells}</tr></thead>
     <tbody>{''.join(body_rows)}</tbody>
@@ -613,32 +703,63 @@ def render_operation_table(data: Dict, solution: bool) -> str:
 
 
 def render_number_line(data: Dict, solution: bool) -> str:
-    ticks = []
-    total_range = data["end"] - data["start"]
-    for value in range(data["start"], data["end"] + 1):
-        major = value % data["major_tick"] == 0
-        tick_class = "major" if major else "minor"
-        label = str(value) if major else ""
-        position = ((value - data["start"]) / total_range) * 100 if total_range else 0
-        ticks.append(
-            f"<div class='tick {tick_class}' style='left: {position}%'>"
-            f"<div class='tick-mark'></div><div class='tick-label'>{label}</div></div>"
+    start = data["start"]
+    end = data["end"]
+    major = data["major_tick"]
+    total_range = max(1, end - start)
+
+    width = 1000
+    height = 220
+    left_margin = 50
+    right_margin = 50
+    usable_width = width - left_margin - right_margin
+    axis_y = 170
+    tick_height_major = 40
+    tick_height_minor = 24
+    label_offset = 18
+
+    tick_elements = []
+    for value in range(start, end + 1):
+        x = left_margin + ((value - start) / total_range) * usable_width
+        is_major = (value - start) % major == 0
+        tick_height = tick_height_major if is_major else tick_height_minor
+        label = str(value) if is_major else ""
+        tick_elements.append(
+            f"<line x1='{x:.2f}' y1='{axis_y}' x2='{x:.2f}' y2='{axis_y - tick_height}' class='tick-line{' major' if is_major else ''}' />"
         )
-    values_html = []
-    for v in data["values"]:
-        box_value = str(v) if solution else ""
-        position = ((v - data["start"]) / total_range) * 100
-        values_html.append(
-            f"<div class='number-line-box' style='left: {position}%'>"
-            f"<span class='number-box'>{box_value}</span><div class='connector'></div></div>"
-        )
+        if label:
+            tick_elements.append(
+                f"<text x='{x:.2f}' y='{axis_y - tick_height - label_offset}' class='tick-label'>{label}</text>"
+            )
+
+    value_elements = []
+    if data["values"]:
+        spacing = usable_width / (len(data["values"]) + 1)
+        box_width = 70
+        box_height = 36
+        box_y = 30
+        for idx, value in enumerate(data["values"]):
+            box_center_x = left_margin + spacing * (idx + 1)
+            tick_x = left_margin + ((value - start) / total_range) * usable_width
+            value_elements.append(
+                f"<line x1='{box_center_x:.2f}' y1='{box_y + box_height}' x2='{tick_x:.2f}' y2='{axis_y}' class='connector-line' />"
+            )
+            box_value = str(value) if solution else ""
+            value_elements.append(
+                f"<rect x='{box_center_x - box_width / 2:.2f}' y='{box_y}' width='{box_width}' height='{box_height}' rx='4' class='number-line-rect' />"
+                f"<text x='{box_center_x:.2f}' y='{box_y + box_height / 2 + 5:.2f}' class='number-line-text'>{box_value}</text>"
+            )
+
+    svg_content = "".join(tick_elements + value_elements)
+    axis_line = f"<line x1='{left_margin}' y1='{axis_y}' x2='{width - right_margin}' y2='{axis_y}' class='axis-line' />"
+
     return f"""<div class='task'>
   <div class='task-title'>{data['title']}</div>
   <div class='number-line-container'>
-    <div class='number-line-track'>
-      {''.join(ticks)}
-      {''.join(values_html)}
-    </div>
+    <svg class='number-line-svg' viewBox='0 0 {width} {height}' preserveAspectRatio='none'>
+      {axis_line}
+      {svg_content}
+    </svg>
   </div>
 </div>"""
 
@@ -757,75 +878,88 @@ STYLE_BLOCK = """
   .tallies .tally {
     margin-right: 0.1cm;
   }
+  .dice-faces {
+    display: inline-flex;
+    gap: 0.1cm;
+    vertical-align: middle;
+  }
   .dice-face {
-    font-size: 16pt;
-    letter-spacing: 0.05cm;
+    display: inline-block;
+  }
+  .dice-svg {
+    width: 0.9cm;
+    height: 0.9cm;
+  }
+  .dice-svg .dice-rect {
+    fill: #fff;
+    stroke: #000;
+    stroke-width: 3;
+  }
+  .dice-svg circle {
+    fill: #000;
   }
 
   .ordering-numbers {
     margin-bottom: 0.3cm;
   }
-  .ordering-chain {
-    display: flex;
-    align-items: center;
-    gap: 0.2cm;
+  .ordering-table {
+    border-collapse: collapse;
+    width: 100%;
   }
-  .compare-symbol {
-    font-size: 14pt;
+  .ordering-cell {
+    border: 1px solid #000;
+    width: 0.8cm;
+    height: 0.8cm;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 12pt;
+  }
+  .ordering-cell.comparator {
+    width: 0.6cm;
   }
 
   .operation-table-grid {
     display: grid;
     gap: 0.5cm;
+    grid-template-columns: repeat(auto-fit, minmax(6cm, 1fr));
+    align-items: start;
   }
   .operation-table {
     border: 1px solid #000;
     padding: 0.2cm;
   }
-  .operation-label {
+  .operation-symbol {
+    background: #f5f5f5;
     font-weight: bold;
-    margin-bottom: 0.2cm;
   }
 
   .number-line-container {
-    position: relative;
-    height: 5cm;
+    width: 100%;
   }
-  .number-line-track {
-    position: absolute;
-    bottom: 1cm;
-    left: 0;
-    right: 0;
-    height: 2cm;
-    border-bottom: 2px solid #000;
+  .number-line-svg {
+    width: 100%;
+    height: auto;
   }
-  .tick {
-    position: absolute;
-    bottom: 0;
-    text-align: center;
+  .axis-line, .tick-line, .connector-line {
+    stroke: #000;
+    stroke-width: 2;
   }
-  .tick-mark {
-    width: 2px;
-    margin: 0 auto;
-    background: #000;
+  .tick-line.major {
+    stroke-width: 3;
   }
-  .tick.major .tick-mark { height: 1cm; }
-  .tick.minor .tick-mark { height: 0.6cm; }
   .tick-label {
-    margin-top: 0.1cm;
     font-size: 10pt;
+    text-anchor: middle;
   }
-  .number-line-box {
-    position: absolute;
-    bottom: 1.4cm;
-    transform: translateX(-50%);
-    text-align: center;
+  .number-line-rect {
+    fill: #fff;
+    stroke: #000;
+    stroke-width: 2;
   }
-  .number-line-box .connector {
-    width: 2px;
-    height: 0.4cm;
-    background: #000;
-    margin: 0 auto;
+  .number-line-text {
+    font-size: 12pt;
+    text-anchor: middle;
+    dominant-baseline: middle;
   }
 
   .number-dictation {
