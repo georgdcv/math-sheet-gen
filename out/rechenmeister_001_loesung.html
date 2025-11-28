@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang='de'>
+<head>
+  <meta charset='utf-8'>
+  <title>Arbeitsblatt 1 – Lösung</title>
+  <link rel='preconnect' href='https://fonts.googleapis.com'>
+  <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+  <link href='https://fonts.googleapis.com/css2?family=Zain:ital,wght@0,200;0,300;0,400;0,700;0,800;0,900;1,300;1,400&display=swap' rel='stylesheet'>
+  
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 1.5cm;
+  }
+
+  body {
+    font-family: 'Zain', sans-serif;
+    font-size: 12pt;
+  }
+
+  .worksheet {
+    page-break-after: always;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #000;
+    padding-bottom: 0.3cm;
+    margin-bottom: 0.5cm;
+  }
+
+  .header-field {
+    flex: 0 0 48%;
+  }
+
+  .task {
+    border: 1px solid #000;
+    padding: 0.4cm;
+    margin-bottom: 0.6cm;
+  }
+
+  .task-title {
+    font-weight: bold;
+    margin-bottom: 0.2cm;
+  }
+
+  .number-box {
+    display: inline-block;
+    width: 1cm;
+    height: 1cm;
+    border: 1px solid #000;
+    margin-right: 0.1cm;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 1cm;
+  }
+
+  .compare-grid, .arithmetic-grid {
+    display: grid;
+    gap: 0.4cm;
+  }
+  .compare-grid.cols-2, .arithmetic-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .compare-grid.cols-3, .arithmetic-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .compare-grid.cols-4, .arithmetic-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+  .compare-item, .arithmetic-item {
+    display: flex;
+    align-items: center;
+    gap: 0.2cm;
+  }
+
+  .compare-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1cm;
+    height: 1cm;
+    border: 1px solid #000;
+    border-radius: 50%;
+    font-size: 14pt;
+  }
+
+  .boxed-number {
+    display: inline-block;
+    min-width: 1.2cm;
+    padding: 0.1cm 0.2cm;
+    border: 1px solid #000;
+    text-align: center;
+  }
+
+  .simple-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .simple-table th, .simple-table td {
+    border: 1px solid #000;
+    padding: 0.2cm;
+    text-align: center;
+  }
+  .simple-table th {
+    background: #f5f5f5;
+  }
+
+  .dice-cell {
+    font-size: 18pt;
+  }
+  .tallies .tally {
+    margin-right: 0.1cm;
+  }
+  .dice-face {
+    font-size: 16pt;
+    letter-spacing: 0.05cm;
+  }
+
+  .ordering-numbers {
+    margin-bottom: 0.3cm;
+  }
+  .ordering-chain {
+    display: flex;
+    align-items: center;
+    gap: 0.2cm;
+  }
+  .compare-symbol {
+    font-size: 14pt;
+  }
+
+  .operation-table-grid {
+    display: grid;
+    gap: 0.5cm;
+  }
+  .operation-table {
+    border: 1px solid #000;
+    padding: 0.2cm;
+  }
+  .operation-label {
+    font-weight: bold;
+    margin-bottom: 0.2cm;
+  }
+
+  .number-line-container {
+    position: relative;
+    height: 5cm;
+  }
+  .number-line-track {
+    position: absolute;
+    bottom: 1cm;
+    left: 0;
+    right: 0;
+    height: 2cm;
+    border-bottom: 2px solid #000;
+  }
+  .tick {
+    position: absolute;
+    bottom: 0;
+    text-align: center;
+  }
+  .tick-mark {
+    width: 2px;
+    margin: 0 auto;
+    background: #000;
+  }
+  .tick.major .tick-mark { height: 1cm; }
+  .tick.minor .tick-mark { height: 0.6cm; }
+  .tick-label {
+    margin-top: 0.1cm;
+    font-size: 10pt;
+  }
+  .number-line-box {
+    position: absolute;
+    bottom: 1.4cm;
+    transform: translateX(-50%);
+    text-align: center;
+  }
+  .number-line-box .connector {
+    width: 2px;
+    height: 0.4cm;
+    background: #000;
+    margin: 0 auto;
+  }
+
+  .number-dictation {
+    display: flex;
+    gap: 0.1cm;
+  }
+</style>
+
+</head>
+<body>
+  <div class='worksheet'>
+    <div class='header'>
+      <div class='header-field'>Name:</div>
+      <div class='header-field'>Datum:</div>
+    </div>
+    <div class='task'>
+  <div class='task-title'>Zahlendiktat</div>
+  <div class='number-dictation'><span class='number-box'>1</span><span class='number-box'>2</span><span class='number-box'>3</span><span class='number-box'>4</span><span class='number-box'>5</span><span class='number-box'>6</span><span class='number-box'>7</span><span class='number-box'>8</span><span class='number-box'>9</span><span class='number-box'>10</span><span class='number-box'>11</span><span class='number-box'>12</span></div>
+</div>
+<div class='task'>
+  <div class='task-title'>Vergleiche! <, >, =</div>
+  <div class='compare-grid cols-3'>
+    <div class='compare-item'><span class='boxed-number'>28</span><span class='compare-circle'>></span><span class='boxed-number'>7</span></div><div class='compare-item'><span class='boxed-number'>37</span><span class='compare-circle'>=</span><span class='boxed-number'>37</span></div><div class='compare-item'><span class='boxed-number'>44</span><span class='compare-circle'>=</span><span class='boxed-number'>44</span></div><div class='compare-item'><span class='boxed-number'>49</span><span class='compare-circle'>=</span><span class='boxed-number'>49</span></div><div class='compare-item'><span class='boxed-number'>1</span><span class='compare-circle'><</span><span class='boxed-number'>50</span></div><div class='compare-item'><span class='boxed-number'>41</span><span class='compare-circle'>=</span><span class='boxed-number'>41</span></div><div class='compare-item'><span class='boxed-number'>39</span><span class='compare-circle'>></span><span class='boxed-number'>29</span></div><div class='compare-item'><span class='boxed-number'>11</span><span class='compare-circle'>=</span><span class='boxed-number'>11</span></div><div class='compare-item'><span class='boxed-number'>0</span><span class='compare-circle'><</span><span class='boxed-number'>32</span></div>
+  </div>
+</div>
+<div class='task'>
+  <div class='task-title'>Vorgänger / Zahl / Nachfolger</div>
+  <table class='simple-table'>
+    <thead><tr><th>Vorgänger</th><th>Zahl</th><th>Nachfolger</th></tr></thead>
+    <tbody><tr><td>25</td><td>26</td><td>27</td></tr><tr><td>12</td><td>13</td><td>14</td></tr><tr><td>27</td><td>28</td><td>29</td></tr><tr><td>12</td><td>13</td><td>14</td></tr><tr><td>31</td><td>32</td><td>33</td></tr><tr><td>26</td><td>27</td><td>28</td></tr></tbody>
+  </table>
+</div>
+<div class='task'>
+  <div class='task-title'>Rechne! Achte auf das Rechenzeichen!</div>
+  <div class='arithmetic-grid cols-3'>
+    <div class='arithmetic-item'>11 - 8 = <span class='number-box'>3</span></div><div class='arithmetic-item'>16 - 0 = <span class='number-box'>16</span></div><div class='arithmetic-item'>0 + 10 = <span class='number-box'>10</span></div><div class='arithmetic-item'>1 + 2 = <span class='number-box'>3</span></div><div class='arithmetic-item'>5 - 2 = <span class='number-box'>3</span></div><div class='arithmetic-item'>4 + 0 = <span class='number-box'>4</span></div><div class='arithmetic-item'>5 + 8 = <span class='number-box'>13</span></div><div class='arithmetic-item'>9 + 4 = <span class='number-box'>13</span></div><div class='arithmetic-item'>18 - 14 = <span class='number-box'>4</span></div><div class='arithmetic-item'>9 - 8 = <span class='number-box'>1</span></div><div class='arithmetic-item'>5 + 13 = <span class='number-box'>18</span></div><div class='arithmetic-item'>20 - 6 = <span class='number-box'>14</span></div>
+  </div>
+</div>
+<div class='task'>
+  <div class='task-title'>Zahlwort – Würfelbild – Zahl</div>
+  <table class='simple-table'>
+    <thead><tr><th>Zahlwort</th><th>Würfelbild</th><th>Zahl</th></tr></thead>
+    <tbody><tr><td>neunundvierzig</td><td class='dice-cell'><div class='dice-combo'><span class='tallies'><span class='tally'>|||||</span> <span class='tally'>|||||</span> <span class='tally'>|||||</span> <span class='tally'>|||||</span></span> <span class='dice-face'>●●●●●●●●●</span></div></td><td>49</td></tr><tr><td>fünfundfünfzig</td><td class='dice-cell'><div class='dice-combo'><span class='tallies'><span class='tally'>|||||</span> <span class='tally'>|||||</span> <span class='tally'>|||||</span> <span class='tally'>|||||</span> <span class='tally'>|||||</span></span> <span class='dice-face'>●●●●●</span></div></td><td>55</td></tr><tr><td>vierundzwanzig</td><td class='dice-cell'><div class='dice-combo'><span class='tallies'><span class='tally'>|||||</span> <span class='tally'>|||||</span></span> <span class='dice-face'>●●●●</span></div></td><td>24</td></tr><tr><td>einunddreißig</td><td class='dice-cell'><div class='dice-combo'><span class='tallies'><span class='tally'>|||||</span> <span class='tally'>|||||</span> <span class='tally'>|||||</span></span> <span class='dice-face'>●</span></div></td><td>31</td></tr><tr><td>fünfundachtzig</td><td class='dice-cell'><div class='dice-combo'><span class='tallies'><span class='tally'>|||||</span> <span class='tally'>|||||</span> <span class='tally'>|||||</span> <span class='tally'>|||||</span> <span class='tally'>|||||</span> <span class='tally'>|||||</span> <span class='tally'>|||||</span> <span class='tally'>|||||</span></span> <span class='dice-face'>●●●●●</span></div></td><td>85</td></tr><tr><td>fünfundvierzig</td><td class='dice-cell'><div class='dice-combo'><span class='tallies'><span class='tally'>|||||</span> <span class='tally'>|||||</span> <span class='tally'>|||||</span> <span class='tally'>|||||</span></span> <span class='dice-face'>●●●●●</span></div></td><td>45</td></tr></tbody>
+  </table>
+</div>
+<div class='task'>
+  <div class='task-title'>Ordne! Beginne mit der kleinsten Zahl!</div>
+  <div class='ordering-numbers'>29, 51, 67, 19, 20, 60</div>
+  <div class='ordering-chain'><span class='number-box'>19</span> <span class='compare-symbol'><</span> <span class='number-box'>20</span> <span class='compare-symbol'><</span> <span class='number-box'>29</span> <span class='compare-symbol'><</span> <span class='number-box'>51</span> <span class='compare-symbol'><</span> <span class='number-box'>60</span> <span class='compare-symbol'><</span> <span class='number-box'>67</span></div>
+</div>
+<div class='task'>
+  <div class='task-title'>Achte auf das Rechenzeichen!</div>
+  <div class='operation-table-grid'>
+    
+<div class='operation-table'>
+  <div class='operation-label'>Rechenart: +</div>
+  <table class='simple-table'>
+    <thead><tr><th></th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead>
+    <tbody><tr><th>10</th><td>11</td><td>12</td><td>13</td><td>14</td></tr><tr><th>20</th><td>21</td><td>22</td><td>23</td><td>24</td></tr><tr><th>30</th><td>31</td><td>32</td><td>33</td><td>34</td></tr><tr><th>40</th><td>41</td><td>42</td><td>43</td><td>44</td></tr></tbody>
+  </table>
+</div>
+<div class='operation-table'>
+  <div class='operation-label'>Rechenart: -</div>
+  <table class='simple-table'>
+    <thead><tr><th></th><th>10</th><th>5</th><th>2</th></tr></thead>
+    <tbody><tr><th>50</th><td>40</td><td>45</td><td>48</td></tr><tr><th>40</th><td>30</td><td>35</td><td>38</td></tr><tr><th>30</th><td>20</td><td>25</td><td>28</td></tr><tr><th>20</th><td>10</td><td>15</td><td>18</td></tr></tbody>
+  </table>
+</div>
+  </div>
+</div>
+<div class='task'>
+  <div class='task-title'>Zahlenstrahl</div>
+  <div class='number-line-container'>
+    <div class='number-line-track'>
+      <div class='tick major' style='left: 0.0%'><div class='tick-mark'></div><div class='tick-label'>0</div></div><div class='tick minor' style='left: 1.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 2.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 3.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 4.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 5.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 6.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 7.000000000000001%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 8.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 9.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick major' style='left: 10.0%'><div class='tick-mark'></div><div class='tick-label'>10</div></div><div class='tick minor' style='left: 11.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 12.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 13.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 14.000000000000002%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 15.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 16.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 17.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 18.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 19.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick major' style='left: 20.0%'><div class='tick-mark'></div><div class='tick-label'>20</div></div><div class='tick minor' style='left: 21.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 22.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 23.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 24.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 25.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 26.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 27.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 28.000000000000004%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 28.999999999999996%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick major' style='left: 30.0%'><div class='tick-mark'></div><div class='tick-label'>30</div></div><div class='tick minor' style='left: 31.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 32.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 33.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 34.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 35.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 36.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 37.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 38.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 39.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick major' style='left: 40.0%'><div class='tick-mark'></div><div class='tick-label'>40</div></div><div class='tick minor' style='left: 41.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 42.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 43.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 44.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 45.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 46.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 47.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 48.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 49.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick major' style='left: 50.0%'><div class='tick-mark'></div><div class='tick-label'>50</div></div><div class='tick minor' style='left: 51.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 52.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 53.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 54.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 55.00000000000001%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 56.00000000000001%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 56.99999999999999%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 57.99999999999999%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 59.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick major' style='left: 60.0%'><div class='tick-mark'></div><div class='tick-label'>60</div></div><div class='tick minor' style='left: 61.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 62.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 63.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 64.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 65.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 66.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 67.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 68.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 69.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick major' style='left: 70.0%'><div class='tick-mark'></div><div class='tick-label'>70</div></div><div class='tick minor' style='left: 71.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 72.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 73.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 74.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 75.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 76.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 77.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 78.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 79.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick major' style='left: 80.0%'><div class='tick-mark'></div><div class='tick-label'>80</div></div><div class='tick minor' style='left: 81.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 82.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 83.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 84.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 85.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 86.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 87.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 88.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 89.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick major' style='left: 90.0%'><div class='tick-mark'></div><div class='tick-label'>90</div></div><div class='tick minor' style='left: 91.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 92.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 93.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 94.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 95.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 96.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 97.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 98.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick minor' style='left: 99.0%'><div class='tick-mark'></div><div class='tick-label'></div></div><div class='tick major' style='left: 100.0%'><div class='tick-mark'></div><div class='tick-label'>100</div></div>
+      <div class='number-line-box' style='left: 15.0%'><span class='number-box'>15</span><div class='connector'></div></div><div class='number-line-box' style='left: 37.0%'><span class='number-box'>37</span><div class='connector'></div></div><div class='number-line-box' style='left: 52.0%'><span class='number-box'>52</span><div class='connector'></div></div><div class='number-line-box' style='left: 78.0%'><span class='number-box'>78</span><div class='connector'></div></div>
+    </div>
+  </div>
+</div>
+  </div>
+</body>
+</html>
