@@ -8,6 +8,23 @@ Erzeugung von einzelnen HTML-Arbeitsblättern (inkl. Lösungsblatt) für Grundsc
 - **Batch:** Mehrere Blätter mit identischen Einstellungen, aber unterschiedlichen Seeds (`base_seed + worksheet_index`).
 - **Ausgabe:** Einzelne HTML-Dateien im konfigurierten Ausgabeverzeichnis `output.out_dir` mit Namensschema `<file_prefix>_<index:03d>.html` und `<file_prefix>_<index:03d>_loesung.html`.
 
+### Konfigurationsformat (aktuelle Implementierung)
+- Wurzel: `base_seed`, `worksheet_count`, `output`, `worksheet`.
+- `output`: `out_dir`, `file_prefix`.
+- `worksheet`: `header_left_label`, `header_right_label`, `tasks` (Liste).
+- Jedes Task-Element besitzt `type` und optionale Felder:
+  - `number_dictation`: `box_count`, `show_helper_numbers` (setzt im Lösungsblatt Hilfsziffern 1..n ein), `title`.
+  - `compare_numbers`: `item_count`, `min_value`, `max_value`, `columns`, `equal_probability`, `title`.
+  - `pre_succ_table`: `row_count`, `min_value`, `max_value`, `given_field` (`middle` Standard, alternativ `left`, `right`, `mixed`), `title`.
+  - `arithmetic_list`: `item_count`, `operations` (`+`/`-`), `min_value`, `max_value`, `allow_negative_results`, `columns`, `title`.
+  - `number_word_table`: `first_row_example` (Bool, fügt über `example_number` eine komplett ausgefüllte Beispielzeile hinzu), `row_count` (Anzahl Übungszeilen **exklusive** Beispiel), `min_value`, `max_value`, `given_columns` (Spalten, die im Aufgabenblatt gefüllt sind), `title`.
+  - `ordering`: `set_size`, `min_value`, `max_value`, `order` (`increasing`/`decreasing`), `show_comparison_symbols`, `title`.
+  - `operation_table`: `result_range` (`min`, `max` Pflicht), `tables` (Liste mit `operation`, `row_headers`, `col_headers`, `given_cells`), `title`.
+    - `row_headers`/`col_headers` können als Liste ganzer Zahlen oder als Objekt `{ start, end, step }` angegeben werden.
+    - `given_cells`: `none`, `diagonal`, `random_<n>` oder explizite Koordinatenliste.
+    - Ergebnisse außerhalb `result_range` führen zu einem Konfigurationsfehler.
+  - `number_line`: `start`, `end`, `major_tick_interval`, optionale `values` (Liste; ohne Angabe werden fünf Werte außerhalb der Major-Ticks gewählt), `title`.
+
 ## Layout-Vorgaben
 - Jede HTML-Datei enthält genau ein Arbeitsblatt mit optionale `page-break-after: always;`.
 - Kopfzeile mit zwei Feldern (z. B. Name/Datum) getrennt durch eine Linie.

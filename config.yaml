@@ -1,0 +1,70 @@
+base_seed: 1234
+worksheet_count: 2
+output:
+  out_dir: out
+  file_prefix: rechenmeister
+worksheet:
+  header_left_label: "Name:"
+  header_right_label: "Datum:"
+  tasks:
+    - type: number_dictation
+      title: "Zahlendiktat"
+      box_count: 12
+      show_helper_numbers: true
+    - type: compare_numbers
+      title: "Vergleiche! <, >, ="
+      item_count: 9
+      min_value: 0
+      max_value: 50
+      columns: 3
+      equal_probability: 0.25
+    - type: pre_succ_table
+      row_count: 6
+      min_value: 10
+      max_value: 40
+      given_field: mixed
+    - type: arithmetic_list
+      item_count: 12
+      operations: ["+", "-"]
+      min_value: 0
+      max_value: 20
+      allow_negative_results: false
+      columns: 3
+    - type: number_word_table
+      first_row_example: true
+      example_number: 49
+      row_count: 5
+      min_value: 11
+      max_value: 99
+      given_columns: ["word"]
+    - type: ordering
+      set_size: 6
+      min_value: 10
+      max_value: 99
+      order: increasing
+      show_comparison_symbols: true
+    - type: operation_table
+      title: "Achte auf das Rechenzeichen!"
+      result_range:
+        min: 0
+        max: 100
+      tables:
+        - operation: "+"
+          row_headers:
+            start: 10
+            end: 40
+            step: 10
+          col_headers:
+            start: 1
+            end: 4
+            step: 1
+          given_cells: diagonal
+        - operation: "-"
+          row_headers: [50, 40, 30, 20]
+          col_headers: [10, 5, 2]
+          given_cells: random_3
+    - type: number_line
+      start: 0
+      end: 100
+      major_tick_interval: 10
+      values: [15, 37, 52, 78]
