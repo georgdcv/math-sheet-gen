@@ -155,8 +155,10 @@ def generate_number_dictation(data: Dict, rng: random.Random) -> Dict:
 
 def generate_compare_numbers(data: Dict, rng: random.Random) -> Dict:
     item_count = int(data.get("item_count", 6))
-    min_value = int(data.get("min_value", 0))
-    max_value = int(data.get("max_value", 20))
+    min_value = max(0, int(data.get("min_value", 0)))
+    max_value = min(100, int(data.get("max_value", 100)))
+    if min_value > max_value:
+        min_value, max_value = max_value, min_value
     columns = int(data.get("columns", 3))
     equal_probability = max(0.0, min(1.0, float(data.get("equal_probability", 0.05))))
 
@@ -188,8 +190,10 @@ def _choose_middle_value(rng: random.Random, min_value: int, max_value: int) -> 
 
 def generate_pre_succ_table(data: Dict, rng: random.Random) -> Dict:
     row_count = int(data.get("row_count", 6))
-    min_value = int(data.get("min_value", 0))
-    max_value = int(data.get("max_value", 100))
+    min_value = max(0, int(data.get("min_value", 0)))
+    max_value = min(100, int(data.get("max_value", 100)))
+    if min_value > max_value:
+        min_value, max_value = max_value, min_value
     given_field = data.get("given_field", "middle")
 
     rows = []
@@ -226,10 +230,14 @@ def generate_arithmetic_list(data: Dict, rng: random.Random) -> Dict:
     max_second_operand = max(min_value, max(0, min(int(data.get("max_second_operand", 10)), max_value)))
 
     def is_crossing_ten_add(x: int, y: int) -> bool:
-        return (x % 10) + (y % 10) >= 10
+        ones_sum = (x % 10) + (y % 10)
+        return ones_sum > 10
 
     def is_crossing_ten_subtract(x: int, y: int) -> bool:
-        return (x % 10) < (y % 10)
+        minuend_ones = x % 10
+        if minuend_ones == 0:
+            return False
+        return minuend_ones < (y % 10)
 
     def generate_candidate(op_symbol: str, require_cross: bool) -> Optional[Tuple[int, int, int]]:
         max_attempts = 500
@@ -331,10 +339,41 @@ def _dice_svg(face_value: int) -> str:
     circles = "".join(
         f"<circle cx='{x}' cy='{y}' r='8' />" for x, y in pip_positions.get(face_value, [])
     )
+    return "<svg class='dice-svg' viewBox='0 0 100 100' role='img' aria-label='Würfel'>" f"{circles}</svg>"
+
+
+def _tally_svg(count: int) -> str:
+    if count <= 0:
+        return ""
+
+    top_margin = 5
+    line_height = 90
+    bottom_margin = 5
+    line_spacing = 10
+    group_gap = 16
+
+    groups: List[int] = []
+    remaining = count
+    while remaining > 0:
+        groups.append(min(5, remaining))
+        remaining -= groups[-1]
+
+    x = 5
+    lines = []
+    for idx, group_size in enumerate(groups):
+        for _ in range(group_size):
+            lines.append(
+                f"<line x1='{x}' y1='{top_margin}' x2='{x}' y2='{top_margin + line_height}' class='tally-line' />"
+            )
+            x += line_spacing
+        if idx < len(groups) - 1:
+            x += group_gap
+
+    width = x + 5
+    height = top_margin + line_height + bottom_margin
     return (
-        "<svg class='dice-svg' viewBox='0 0 100 100' role='img' aria-label='Würfel'>"
-        "<rect x='5' y='5' width='90' height='90' rx='12' ry='12' class='dice-rect' />"
-        f"{circles}</svg>"
+        f"<svg class='tally-svg' viewBox='0 0 {width} {height}' role='img' aria-label='Zehner-Striche'>"
+        f"{''.join(lines)}</svg>"
     )
 
 
@@ -351,16 +390,16 @@ def _ones_as_dice_faces(ones: int) -> List[str]:
 def dice_representation(value: int) -> str:
     tens = value // 10
     ones = value % 10
-    tally_groups = ["|||||"] * tens
+    tally_svg = _tally_svg(tens)
     dice_faces = _ones_as_dice_faces(ones)
 
-    tally_html = " ".join(f"<span class='tally'>{group}</span>" for group in tally_groups)
+    tally_html = f"<span class='tallies'>{tally_svg}</span>" if tally_svg else ""
     dice_html = "".join(f"<span class='dice-face'>{face}</span>" for face in dice_faces)
 
     if tally_html and dice_html:
-        return f"<div class='dice-combo'><span class='tallies'>{tally_html}</span><span class='dice-faces'>{dice_html}</span></div>"
+        return f"<div class='dice-combo'>{tally_html}<span class='dice-faces'>{dice_html}</span></div>"
     if tally_html:
-        return f"<div class='dice-combo'><span class='tallies'>{tally_html}</span></div>"
+        return f"<div class='dice-combo'>{tally_html}</div>"
     return f"<div class='dice-combo'><span class='dice-faces'>{dice_html}</span></div>"
 
 
@@ -438,6 +477,20 @@ def parse_header_sequence(values: Sequence[int] | Dict[str, int]) -> List[int]:
     return [int(v) for v in values]
 
 
+def _enforce_tens_headers(headers: List[int]) -> List[int]:
+    enforced: List[int] = []
+    seen = set()
+    for value in headers:
+        if value % 10 == 0:
+            adjusted = value
+        else:
+            adjusted = int(math.copysign(math.ceil(abs(value) / 10) * 10, value))
+        if adjusted not in seen:
+            enforced.append(adjusted)
+            seen.add(adjusted)
+    return enforced
+
+
 def generate_operation_table(data: Dict, rng: random.Random) -> Dict:
     result_range = data.get("result_range")
     if not result_range or "min" not in result_range or "max" not in result_range:
@@ -470,8 +523,10 @@ def generate_operation_table(data: Dict, rng: random.Random) -> Dict:
         if isinstance(col_headers_source, dict) and "step" not in col_headers_source:
             col_headers_source = {**col_headers_source, "step": col_step}
 
-        row_headers = parse_header_sequence(row_headers_source)
-        col_headers = parse_header_sequence(col_headers_source)
+        row_headers = _enforce_tens_headers(parse_header_sequence(row_headers_source))
+        col_headers = _enforce_tens_headers(parse_header_sequence(col_headers_source))
+        if not row_headers or not col_headers:
+            raise ValueError("Row and column headers must contain at least one value")
         given_cells = table.get("given_cells", "none")
 
         # validate results
@@ -534,7 +589,9 @@ def generate_number_line(data: Dict, rng: random.Random) -> Dict:
         values.sort()
     values = [int(v) for v in values]
     return {
-        "title": data.get("title", "Zahlenstrahl"),
+        "title": data.get(
+            "title", "Trage zuerst die Zehnerzahlen an den Zahlenstrahl. Trage dann die Zahlen ein."
+        ),
         "start": start,
         "end": end,
         "major_tick": major_tick,
@@ -713,23 +770,33 @@ def render_number_line(data: Dict, solution: bool) -> str:
     left_margin = 50
     right_margin = 50
     usable_width = width - left_margin - right_margin
-    axis_y = 170
-    tick_height_major = 40
-    tick_height_minor = 24
+    axis_y = 150
+    tick_height_major = 48
+    tick_height_mid = 32
+    tick_height_minor = 18
     label_offset = 18
 
     tick_elements = []
+    tick_tops: Dict[int, float] = {}
     for value in range(start, end + 1):
         x = left_margin + ((value - start) / total_range) * usable_width
         is_major = (value - start) % major == 0
-        tick_height = tick_height_major if is_major else tick_height_minor
-        label = str(value) if is_major else ""
+        is_mid_major = major % 2 == 0 and not is_major and (value - start) % major == major // 2
+        if is_major:
+            tick_height = tick_height_major
+        elif is_mid_major:
+            tick_height = tick_height_mid
+        else:
+            tick_height = tick_height_minor
+        y_top = axis_y - tick_height / 2
+        y_bottom = axis_y + tick_height / 2
+        tick_tops[value] = y_top
         tick_elements.append(
-            f"<line x1='{x:.2f}' y1='{axis_y}' x2='{x:.2f}' y2='{axis_y - tick_height}' class='tick-line{' major' if is_major else ''}' />"
+            f"<line x1='{x:.2f}' y1='{y_top:.2f}' x2='{x:.2f}' y2='{y_bottom:.2f}' class='tick-line{' major' if is_major else ' mid' if is_mid_major else ''}' />"
         )
-        if label:
+        if is_major and solution:
             tick_elements.append(
-                f"<text x='{x:.2f}' y='{axis_y - tick_height - label_offset}' class='tick-label'>{label}</text>"
+                f"<text x='{x:.2f}' y='{y_top - label_offset:.2f}' class='tick-label'>{value}</text>"
             )
 
     value_elements = []
@@ -737,12 +804,13 @@ def render_number_line(data: Dict, solution: bool) -> str:
         spacing = usable_width / (len(data["values"]) + 1)
         box_width = 70
         box_height = 36
-        box_y = 30
+        box_y = 24
         for idx, value in enumerate(data["values"]):
             box_center_x = left_margin + spacing * (idx + 1)
             tick_x = left_margin + ((value - start) / total_range) * usable_width
+            tick_target_y = tick_tops.get(value, axis_y - tick_height_minor / 2)
             value_elements.append(
-                f"<line x1='{box_center_x:.2f}' y1='{box_y + box_height}' x2='{tick_x:.2f}' y2='{axis_y}' class='connector-line' />"
+                f"<line x1='{box_center_x:.2f}' y1='{box_y + box_height}' x2='{tick_x:.2f}' y2='{tick_target_y:.2f}' class='connector-line' />"
             )
             box_value = str(value) if solution else ""
             value_elements.append(
@@ -875,8 +943,23 @@ STYLE_BLOCK = """
   .dice-cell {
     font-size: 18pt;
   }
-  .tallies .tally {
-    margin-right: 0.1cm;
+  .dice-combo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15cm;
+  }
+  .tallies {
+    display: inline-flex;
+    align-items: center;
+  }
+  .tally-svg {
+    height: 1cm;
+    width: auto;
+  }
+  .tally-line {
+    stroke: #000;
+    stroke-width: 5;
+    stroke-linecap: round;
   }
   .dice-faces {
     display: inline-flex;
@@ -889,11 +972,6 @@ STYLE_BLOCK = """
   .dice-svg {
     width: 0.9cm;
     height: 0.9cm;
-  }
-  .dice-svg .dice-rect {
-    fill: #fff;
-    stroke: #000;
-    stroke-width: 3;
   }
   .dice-svg circle {
     fill: #000;
@@ -946,6 +1024,9 @@ STYLE_BLOCK = """
   }
   .tick-line.major {
     stroke-width: 3;
+  }
+  .tick-line.mid {
+    stroke-width: 2.5;
   }
   .tick-label {
     font-size: 10pt;
