@@ -67,6 +67,12 @@ Jeder Aufgabentyp erhält einen internen `type`-Bezeichner.
      * `row_count`.
      * `min_value`, `max_value` (z. B. 11–99).
      * `given_columns`: Liste aus `["word", "dice", "number"]`, welche Spalte(n) vorausgefüllt werden, die restlichen bleiben leer.
+   * Schrift: Wenn möglich Grundschulschrift verwenden; bevorzugt die Google-Font "Zain" via
+     ```html
+     <link rel='preconnect' href='https://fonts.googleapis.com'>
+     <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+     <link href='https://fonts.googleapis.com/css2?family=Zain:ital,wght@0,200;0,300;0,400;0,700;0,800;0,900;1,300;1,400&display=swap' rel='stylesheet'>
+     ```
 
 6. **Zahlen ordnen (`ordering`)**
 
@@ -92,9 +98,9 @@ Jeder Aufgabentyp erhält einen internen `type`-Bezeichner.
        * `row_headers`: Liste von Zahlen.
        * `col_headers`: Liste von Zahlen.
        * `given_cells`: Regellogik, z. B. `"none"`, `"diagonal"`, `"random_3"`.
-      
-     * Anpassungsbedarf: Der Zahlenraum der Lösungen muss konfigurierbar sein
-     * Zahlenschritte müssen definiert werden (z.B. nur 10er Zahle, z.B. 20+10=30)
+
+     * `result_range`: Pflichtfeld zum Begrenzen der Ergebnisse, z. B. `{ min: 0, max: 100 }`; Aufgaben, die außerhalb liegen, werden verworfen/neu gezogen.
+     * `step`: Zahlenschritt für Header-Werte, standardmäßig `1`, alternativ häufig `10`; weitere Optionen können später ergänzt werden.
 
 8. **Zahlenstrahl (`number_line`)**
 
@@ -139,7 +145,34 @@ Die Zuordnung „Kästchen ↔ Tick“ bleibt visuell identisch, nur der Inhalt 
 Technische Anforderung:
 Das Layout muss es ermöglichen, Kästchen unabhängig von der exakten Tick-Position horizontal zu platzieren und die Verbindung über eine diagonal verlaufende Linie zum Tick herzustellen (z. B. über absolut positionierte, dünne Linien-Elemente mit Rotation).
 
-Konfigurierbarkeit fehlt hier noch!
+**Konfiguration (Vorschlag)**
+
+* `range_min`, `range_max`: Geschlossener Wertebereich des Zahlenstrahls (z. B. 0–100).
+* `major_tick_every`: Abstand zwischen Hauptticks (z. B. 10).
+* `label_every`: Alle wieviel Ticks eine Zahlbeschriftung erscheint (Standard = `major_tick_every`).
+* `box_count`: Anzahl der Kästchen oberhalb des Zahlenstrahls.
+* `prefilled_count`: Wie viele der Kästchen bereits eine Zahl enthalten (z. B. 1 Beispiel).
+* `tick_assignment`: Liste oder Regel, die festlegt, welche Tick-Werte den Kästchen zugeordnet werden (z. B. "random_unique" im Bereich, ohne Wiederholungen).
+* `spacing`: Horizontaler Verteilungsmodus der Kästchen (z. B. `"even"` oder explizite Prozentwerte), unabhängig von den Tick-Positionen.
+
+* Wertebereich und Ticks sind ausschließlich ganzzahlig; Bruchteile (z. B. 0,5) werden nicht benötigt.
+* Wenn `tick_assignment` mehr eindeutige Werte braucht als der Bereich hergibt (z. B. `random_unique` bei kleinem Range und großem `box_count`), muss die Generierung mit einer hilfreichen Fehlermeldung abbrechen.
+
+Beispiel-Konfiguration:
+
+```yaml
+  - id: 8
+    type: "number_line"
+    instruction: "Trage die passenden Zahlen ein!"
+    range_min: 0
+    range_max: 100
+    major_tick_every: 10
+    label_every: 10
+    box_count: 6
+    prefilled_count: 1
+    tick_assignment: "random_unique"
+    spacing: "even"
+```
 
 ---
 
@@ -210,7 +243,7 @@ tasks:
 Allgemeine Regeln:
 
 * Nicht benötigte Felder sind optional.
-* Unerkannte Felder führen idealerweise zu einer Warnung, aber nicht zwingend zu einem Abbruch (logbare Hinweise).
+* Unerkannte oder ungültige Felder gelten als Fehler und führen zum Abbruch der Build-Pipeline ("strict mode" als Standardverhalten).
 
 ---
 
@@ -393,4 +426,5 @@ Damit stehen die erzeugten HTML-Arbeitsblätter in der Actions-Run-Ansicht als h
 * Mehrsprachigkeit (konfigurierbare Labels „Name“, „Datum“, …).
 * Konfigurierbare Schriftarten (z. B. Druckschrift vs. Schulschrift, sofern im Browser verfügbar).
 
+---
 
