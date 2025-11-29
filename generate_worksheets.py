@@ -190,11 +190,16 @@ def _choose_middle_value(rng: random.Random, min_value: int, max_value: int) -> 
 
 def generate_pre_succ_table(data: Dict, rng: random.Random) -> Dict:
     row_count = int(data.get("row_count", 6))
-    min_value = max(0, int(data.get("min_value", 0)))
+    min_value = max(10, int(data.get("min_value", 10)))
     max_value = min(100, int(data.get("max_value", 100)))
     if min_value > max_value:
         min_value, max_value = max_value, min_value
     given_field = data.get("given_field", "middle")
+
+    min_value = max(min_value, 10)
+    max_value = min(max_value, 100)
+    if max_value - min_value < 2:
+        raise ValueError("Range too small for predecessor/successor table")
 
     rows = []
     for _ in range(row_count):
@@ -328,6 +333,10 @@ def number_to_word(value: int) -> str:
     return f"{GERMAN_UNDER_20[ones]}und{TENS[tens]}"
 
 
+def underline_and_segment(word: str) -> str:
+    return word.replace("und", "<span class='number-word-and'>und</span>")
+
+
 def _dice_svg(face_value: int) -> str:
     pip_positions = {
         1: [(50, 50)],
@@ -340,6 +349,13 @@ def _dice_svg(face_value: int) -> str:
         f"<circle cx='{x}' cy='{y}' r='8' />" for x, y in pip_positions.get(face_value, [])
     )
     return "<svg class='dice-svg' viewBox='0 0 100 100' role='img' aria-label='Würfel'>" f"{circles}</svg>"
+
+
+def _placeholder_dice_svg() -> str:
+    return (
+        "<svg class='dice-svg dice-placeholder' viewBox='0 0 100 100' role='presentation'>"
+        "<rect x='0' y='0' width='100' height='100' fill='#fff' stroke='#fff' /></svg>"
+    )
 
 
 def _tally_svg(count: int) -> str:
@@ -392,6 +408,8 @@ def dice_representation(value: int) -> str:
     ones = value % 10
     tally_svg = _tally_svg(tens)
     dice_faces = _ones_as_dice_faces(ones)
+    if not dice_faces:
+        dice_faces.append(_placeholder_dice_svg())
 
     tally_html = f"<span class='tallies'>{tally_svg}</span>" if tally_svg else ""
     dice_html = "".join(f"<span class='dice-face'>{face}</span>" for face in dice_faces)
@@ -407,24 +425,36 @@ def generate_number_word_table(data: Dict, rng: random.Random) -> Dict:
     first_row_example = bool(data.get("first_row_example", True))
     example_number = int(data.get("example_number", 49))
     row_count = int(data.get("row_count", 5))
-    min_value = int(data.get("min_value", 11))
-    max_value = int(data.get("max_value", 99))
+    min_value = max(21, int(data.get("min_value", 21)))
+    max_value = min(99, int(data.get("max_value", 99)))
     given_columns = data.get("given_columns", ["word"])
+
+    if min_value > max_value:
+        min_value, max_value = max_value, min_value
+
+    valid_values = [v for v in range(min_value, max_value + 1) if v >= 21 and v % 10 != 0]
+    if not valid_values:
+        raise ValueError("No valid values available for number word table")
+
+    if example_number < 21 or example_number % 10 == 0:
+        example_number = rng.choice(valid_values)
 
     rows = []
     if first_row_example:
+        example_word = underline_and_segment(number_to_word(example_number))
         rows.append({
             "number": example_number,
-            "word": number_to_word(example_number),
+            "word": example_word,
             "dice": dice_representation(example_number),
             "given": ["word", "dice", "number"],
         })
 
     while len(rows) < row_count + (1 if first_row_example else 0):
-        value = rng.randint(min_value, max_value)
+        value = rng.choice(valid_values)
+        word = underline_and_segment(number_to_word(value))
         rows.append({
             "number": value,
-            "word": number_to_word(value),
+            "word": word,
             "dice": dice_representation(value),
             "given": given_columns,
         })
@@ -485,6 +515,8 @@ def _enforce_tens_headers(headers: List[int]) -> List[int]:
             adjusted = value
         else:
             adjusted = int(math.copysign(math.ceil(abs(value) / 10) * 10, value))
+        if adjusted < 10:
+            adjusted = 10
         if adjusted not in seen:
             enforced.append(adjusted)
             seen.add(adjusted)
@@ -499,7 +531,7 @@ def _generate_random_headers(
     min_result: int,
     max_result: int,
 ) -> Tuple[List[int], List[int]]:
-    possible_values = list(range(0, 101, 10))
+    possible_values = list(range(10, 101, 10))
 
     def pick_values(count: int) -> List[int]:
         if count <= len(possible_values):
@@ -546,8 +578,18 @@ def generate_operation_table(data: Dict, rng: random.Random) -> Dict:
     provided_tables = data.get("tables", [])
     if not provided_tables:
         provided_tables = [
-            {"operation": "+", "row_headers": [0, default_step], "col_headers": [0, default_step], "given_cells": "none"},
-            {"operation": "-", "row_headers": [0, default_step], "col_headers": [0, default_step], "given_cells": "none"},
+            {
+                "operation": "+",
+                "row_headers": [10, 10 + default_step],
+                "col_headers": [10, 10 + default_step],
+                "given_cells": "none",
+            },
+            {
+                "operation": "-",
+                "row_headers": [10, 10 + default_step],
+                "col_headers": [10, 10 + default_step],
+                "given_cells": "none",
+            },
         ]
 
     tables_data = []
@@ -566,9 +608,9 @@ def generate_operation_table(data: Dict, rng: random.Random) -> Dict:
             )
         else:
             if not row_headers_source:
-                row_headers_source = [0, row_step]
+                row_headers_source = [10, 10 + row_step]
             if not col_headers_source:
-                col_headers_source = [0, col_step]
+                col_headers_source = [10, 10 + col_step]
 
             if isinstance(row_headers_source, dict) and "step" not in row_headers_source:
                 row_headers_source = {**row_headers_source, "step": row_step}
@@ -694,8 +736,8 @@ def render_compare_numbers(data: Dict, solution: bool) -> str:
     for a, b, symbol in data["items"]:
         sign = symbol if solution else ""
         items_html.append(
-            f"<div class='compare-item'><span class='boxed-number'>{a}</span>"
-            f"<span class='compare-circle'>{sign}</span><span class='boxed-number'>{b}</span></div>"
+            f"<div class='compare-item'><span class='compare-number'>{a}</span>"
+            f"<span class='compare-circle'>{sign}</span><span class='compare-number'>{b}</span></div>"
         )
     column_class = f"cols-{data['columns']}"
     return f"""<div class='task'>
@@ -1006,6 +1048,13 @@ STYLE_BLOCK = """
     text-align: center;
   }
 
+  .compare-number {
+    display: inline-block;
+    min-width: 1.2cm;
+    padding: 0.1cm 0.2cm;
+    text-align: center;
+  }
+
   .simple-table {
     width: 100%;
     border-collapse: collapse;
@@ -1021,6 +1070,8 @@ STYLE_BLOCK = """
 
   .dice-cell {
     font-size: 18pt;
+    line-height: 1.6cm;
+    min-height: 1.6cm;
   }
   .dice-combo {
     display: inline-flex;
@@ -1052,8 +1103,16 @@ STYLE_BLOCK = """
     width: 0.9cm;
     height: 0.9cm;
   }
+  .dice-svg.dice-placeholder {
+    visibility: hidden;
+  }
   .dice-svg circle {
     fill: #000;
+  }
+
+  .number-word-and {
+    text-decoration: underline;
+    text-decoration-thickness: 0.08em;
   }
 
   .ordering-numbers {
@@ -1126,6 +1185,20 @@ STYLE_BLOCK = """
     display: flex;
     gap: 0.1cm;
   }
+
+  .worksheet-page {
+    page-break-after: always;
+    break-after: page;
+  }
+  .worksheet-page:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+  .page-title {
+    font-size: 16pt;
+    font-weight: bold;
+    margin-bottom: 0.2cm;
+  }
 </style>
 """
 
@@ -1141,13 +1214,24 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   {styles}
 </head>
 <body>
-  <div class='worksheet'>
-    <div class='header'>
-      <div class='header-field'>{left_label}</div>
-      <div class='header-field'>{right_label}</div>
-    </div>
-    {tasks}
-  </div>
+  {worksheet_body}
+</body>
+</html>
+"""
+
+
+COMBINED_TEMPLATE = """<!DOCTYPE html>
+<html lang='de'>
+<head>
+  <meta charset='utf-8'>
+  <title>{title}</title>
+  <link rel='preconnect' href='https://fonts.googleapis.com'>
+  <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+  <link href='https://fonts.googleapis.com/css2?family=Zain:ital,wght@0,200;0,300;0,400;0,700;0,800;0,900;1,300;1,400&display=swap' rel='stylesheet'>
+  {styles}
+</head>
+<body>
+  {pages}
 </body>
 </html>
 """
@@ -1172,35 +1256,61 @@ def render_tasks(tasks: List[Tuple[str, Dict]], solution: bool) -> str:
     return "\n".join(rendered)
 
 
-def build_html(title: str, left_label: str, right_label: str, tasks_html: str) -> str:
+def render_worksheet_body(left_label: str, right_label: str, tasks_html: str) -> str:
+    return f"""  <div class='worksheet'>
+    <div class='header'>
+      <div class='header-field'>{left_label}</div>
+      <div class='header-field'>{right_label}</div>
+    </div>
+    {tasks_html}
+  </div>"""
+
+
+def build_html(title: str, worksheet_body: str) -> str:
     return HTML_TEMPLATE.format(
         title=title,
         styles=STYLE_BLOCK,
-        left_label=left_label,
-        right_label=right_label,
-        tasks=tasks_html,
+        worksheet_body=worksheet_body,
     )
 
 
-def generate_single_worksheet(cfg: Config, index: int) -> Tuple[str, str]:
+def build_combined_document(title: str, pages: List[Tuple[str, str]]) -> str:
+    combined_pages = []
+    for page_title, body in pages:
+        combined_pages.append(f"<div class='worksheet-page'><div class='page-title'>{page_title}</div>{body}</div>")
+    return COMBINED_TEMPLATE.format(title=title, styles=STYLE_BLOCK, pages="\n".join(combined_pages))
+
+
+def generate_single_worksheet(cfg: Config, index: int) -> Tuple[str, str, str, str]:
     rng = random.Random(cfg.base_seed + index)
     tasks_data = generate_tasks(cfg.worksheet.tasks, rng)
 
+    worksheet_tasks_html = render_tasks(tasks_data, solution=False)
+    solution_tasks_html = render_tasks(tasks_data, solution=True)
+
+    worksheet_body = render_worksheet_body(
+        cfg.worksheet.header_left_label,
+        cfg.worksheet.header_right_label,
+        worksheet_tasks_html,
+    )
+
+    solution_body = render_worksheet_body(
+        cfg.worksheet.header_left_label,
+        cfg.worksheet.header_right_label,
+        solution_tasks_html,
+    )
+
     worksheet_html = build_html(
         title=f"Arbeitsblatt {index + 1}",
-        left_label=cfg.worksheet.header_left_label,
-        right_label=cfg.worksheet.header_right_label,
-        tasks_html=render_tasks(tasks_data, solution=False),
+        worksheet_body=worksheet_body,
     )
 
     solution_html = build_html(
         title=f"Arbeitsblatt {index + 1} – Lösung",
-        left_label=cfg.worksheet.header_left_label,
-        right_label=cfg.worksheet.header_right_label,
-        tasks_html=render_tasks(tasks_data, solution=True),
+        worksheet_body=solution_body,
     )
 
-    return worksheet_html, solution_html
+    return worksheet_html, solution_html, worksheet_body, solution_body
 
 
 def write_files(cfg: Config, index: int, worksheet_html: str, solution_html: str) -> None:
@@ -1220,9 +1330,22 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     cfg = load_config(args.config)
+    combined_pages: List[Tuple[str, str]] = []
     for i in range(cfg.worksheet_count):
-        worksheet_html, solution_html = generate_single_worksheet(cfg, i)
+        worksheet_html, solution_html, worksheet_body, solution_body = generate_single_worksheet(cfg, i)
         write_files(cfg, i, worksheet_html, solution_html)
+        combined_pages.append((f"Arbeitsblatt {i + 1}", worksheet_body))
+        combined_pages.append((f"Arbeitsblatt {i + 1} – Lösung", solution_body))
+
+    if combined_pages:
+        combined_html = build_combined_document(
+            title=f"{cfg.output.file_prefix} – Gesamtpaket",
+            pages=combined_pages,
+        )
+        combined_path = cfg.output.out_dir / f"{cfg.output.file_prefix}_gesamt.html"
+        ensure_output_dir(cfg.output.out_dir)
+        combined_path.write_text(combined_html, encoding="utf-8")
+
     print(f"Generated {cfg.worksheet_count} worksheets in {cfg.output.out_dir}")
 
 
