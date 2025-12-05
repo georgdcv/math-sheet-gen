@@ -1,0 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@page {
+  size: A4 portrait;
+  margin: 1.8cm 1.6cm 1.8cm 1.6cm;
+  @bottom-center {
+    content: "Seite " counter(page) " / " counter(pages);
+    font-size: 10pt;
+    color: #334155;
+  }
+  @top-center {
+    content: string(doc-title);
+    font-weight: 600;
+    font-size: 10pt;
+    color: #0f172a;
+  }
+}
+
+body {
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: #0f172a;
+  font-size: 12pt;
+  line-height: 1.5;
+  counter-reset: section;
+}
+
+h1, h2, h3, h4 {
+  color: #0f172a;
+  font-weight: 700;
+  margin-top: 1em;
+}
+
+h1 {
+  string-set: doc-title content();
+}
+
+.table, table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.4cm 0 0.6cm;
+}
+
+table th, table td {
+  border: 1px solid #cbd5e1;
+  padding: 0.35cm 0.25cm;
+}
+
+table th {
+  background: #f8fafc;
+  font-weight: 700;
+}
+
+table caption {
+  caption-side: top;
+  font-weight: 700;
+  margin-bottom: 0.2cm;
+}
+
+ul, ol {
+  margin: 0.2cm 0 0.6cm 1.2cm;
+}
+
+.page-break {
+  break-after: page;
+}
+
+.figure {
+  margin: 0.3cm 0 0.6cm;
+}
+
+.caption {
+  text-align: center;
+  font-size: 10pt;
+  color: #475569;
+}
+
+code, pre {
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  background: #f8fafc;
+  border-radius: 4px;
+}
+
+pre {
+  padding: 0.4cm;
+  border: 1px solid #e2e8f0;
+}
+
+.toc { margin-bottom: 0.5cm; }
+
+blockquote {
+  border-left: 3px solid #94a3b8;
+  padding-left: 0.35cm;
+  color: #475569;
+  margin: 0.4cm 0;
+}
+
+.note {
+  padding: 0.3cm 0.4cm;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 6px;
+}

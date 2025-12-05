@@ -1,0 +1,279 @@
+---
+title: "`r params$report_title`"
+author: "math-sheet-gen"
+date: "`r format(Sys.Date(), '%d.%m.%Y')`"
+params:
+  data_path: "data/input.csv"
+  report_title: "Datenqualitätsbericht"
+  missing_threshold: 0.2
+output:
+  pagedown::html_paged:
+    toc: true
+    toc_depth: 3
+    css: ["report.css"]
+    number_sections: true
+lang: de
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width = 8,
+  fig.height = 5
+)
+
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(janitor)
+  library(skimr)
+  library(gridExtra)
+})
+
+has_naniar <- requireNamespace("naniar", quietly = TRUE)
+if (has_naniar) {
+  library(naniar)
+}
+
+read_data <- function(path) {
+  readr::read_csv(path, show_col_types = FALSE) |> 
+    clean_names()
+}
+
+data <- read_data(params$data_path)
+missing_threshold <- params$missing_threshold
+
+numeric_vars <- data |> select(where(is.numeric))
+cat_vars <- data |> select(where(~ !is.numeric(.x)))
+
+missing_summary <- function(df) {
+  tibble(
+    variable = names(df),
+    missing_count = map_int(df, ~ sum(is.na(.x))),
+    missing_pct = map_dbl(df, ~ mean(is.na(.x)) * 100)
+  ) |>
+    arrange(desc(missing_pct))
+}
+
+numeric_summary <- function(df) {
+  if (ncol(df) == 0) return(tibble())
+  df |>
+    summarise(
+      across(
+        everything(),
+        list(
+          count = ~ sum(!is.na(.x)),
+          missing = ~ sum(is.na(.x)),
+          missing_pct = ~ mean(is.na(.x)) * 100,
+          mean = ~ mean(.x, na.rm = TRUE),
+          median = ~ median(.x, na.rm = TRUE),
+          sd = ~ sd(.x, na.rm = TRUE),
+          min = ~ min(.x, na.rm = TRUE),
+          max = ~ max(.x, na.rm = TRUE),
+          iqr = ~ IQR(.x, na.rm = TRUE)
+        )
+      )
+    ) |>
+    pivot_longer(
+      everything(),
+      names_to = c("variable", ".value"),
+      names_pattern = "(.+)_([a-z_]+)"
+    ) |>
+    arrange(variable)
+}
+
+categorical_summary <- function(df, top_n = 10) {
+  if (ncol(df) == 0) return(tibble())
+  map_dfr(names(df), function(var) {
+    column <- df[[var]]
+    tibble(
+      variable = var,
+      level = fct_lump_n(factor(column), n = top_n, other_level = "Andere") |> fct_explicit_na("(NA)"),
+      count = as.integer(table(level)),
+      pct = round(100 * prop.table(table(level)), 2)
+    ) |>
+      arrange(desc(count))
+  })
+}
+
+iqr_outliers <- function(series) {
+  q1 <- quantile(series, 0.25, na.rm = TRUE)
+  q3 <- quantile(series, 0.75, na.rm = TRUE)
+  iqr <- q3 - q1
+  lower <- q1 - 1.5 * iqr
+  upper <- q3 + 1.5 * iqr
+  outlier_flags <- series < lower | series > upper
+  tibble(
+    lower_bound = lower,
+    upper_bound = upper,
+    outliers = sum(outlier_flags, na.rm = TRUE),
+    non_missing = sum(!is.na(series)),
+    outlier_pct = if_else(non_missing > 0, outliers / non_missing * 100, 0)
+  )
+}
+
+outlier_summary <- function(df) {
+  if (ncol(df) == 0) return(tibble())
+  map_dfr(names(df), function(var) {
+    stats <- iqr_outliers(df[[var]])
+    tibble(
+      variable = var,
+      lower_bound = stats$lower_bound,
+      upper_bound = stats$upper_bound,
+      outliers = stats$outliers,
+      outlier_pct = stats$outlier_pct
+    )
+  }) |>
+    arrange(desc(outliers))
+}
+
+plot_numeric_distribution <- function(df, chunk_size = 4) {
+  if (ncol(df) == 0) {
+    cat("Keine numerischen Variablen für Verteilungsplots verfügbar.\n")
+    return(invisible())
+  }
+
+  vars <- names(df)
+  plots <- map(vars, function(var) {
+    ggplot(df, aes(x = .data[[var]])) +
+      geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "#4f46e5", alpha = 0.65) +
+      geom_density(color = "#0f172a", linewidth = 0.9) +
+      labs(title = var, x = var, y = "Dichte") +
+      theme_minimal(base_family = "Inter") +
+      theme(plot.title = element_text(face = "bold"))
+  })
+
+  for (i in seq(1, length(plots), by = chunk_size)) {
+    idx <- i:min(i + chunk_size - 1, length(plots))
+    gridExtra::grid.arrange(grobs = plots[idx], ncol = 2)
+    if (i + chunk_size - 1 < length(plots)) {
+      cat('<div class="page-break"></div>\n')
+    }
+  }
+}
+
+overall_missing <- sum(is.na(data))
+total_cells <- nrow(data) * ncol(data)
+missing_pct_total <- if_else(total_cells > 0, overall_missing / total_cells * 100, 0)
+
+duplicate_rows <- data |> get_dupes() |> nrow()
+duplicate_pct <- if_else(nrow(data) > 0, duplicate_rows / nrow(data) * 100, 0)
+```
+
+# Titelseite
+
+**Datenquelle:** `r params$data_path`
+
+**Generiert am:** `r format(Sys.time(), '%d.%m.%Y %H:%M')`
+
+<div class="page-break"></div>
+
+# Datenüberblick
+
+* Beobachtungen: `r nrow(data)`
+* Variablen: `r ncol(data)`
+* Numerische Spalten: `r ncol(numeric_vars)`
+* Kategorische/sonstige Spalten: `r ncol(cat_vars)`
+
+## Fehlende Werte je Variable
+
+```{r missing-table}
+missing_tbl <- missing_summary(data)
+missing_tbl |> 
+  mutate(high_missing = missing_pct >= missing_threshold * 100) |> 
+  knitr::kable(digits = 2, caption = "Fehlende Werte nach Spalte")
+```
+
+## Übersicht Datentypen
+
+```{r datatype-overview}
+schema_tbl <- tibble(
+  variable = names(data),
+  type = map_chr(data, ~ class(.x)[1])
+)
+knitr::kable(schema_tbl, caption = "Datentypen der Spalten")
+```
+
+<div class="page-break"></div>
+
+# Deskriptive Statistiken
+
+## Numerische Variablen
+
+```{r numeric-stats}
+num_stats <- numeric_summary(numeric_vars)
+if (nrow(num_stats) == 0) {
+  cat("Keine numerischen Variablen vorhanden.\n")
+} else {
+  knitr::kable(num_stats, digits = 2, caption = "Deskriptive Kennzahlen (numerisch)")
+}
+```
+
+## Kategorische Variablen (Top-Werte)
+
+```{r categorical-stats}
+cat_stats <- categorical_summary(cat_vars)
+if (nrow(cat_stats) == 0) {
+  cat("Keine kategorialen Variablen vorhanden.\n")
+} else {
+  cat_stats |> 
+    knitr::kable(digits = 2, caption = "Häufigkeiten pro kategorialer Variable")
+}
+```
+
+<div class="page-break"></div>
+
+# Verteilungen & Ausreißer
+
+## Verteilungen numerischer Variablen
+
+```{r numeric-plots, results='asis'}
+plot_numeric_distribution(numeric_vars)
+```
+
+## Ausreißerübersicht (IQR-Regel)
+
+```{r outlier-table}
+out_tbl <- outlier_summary(numeric_vars)
+if (nrow(out_tbl) == 0) {
+  cat("Keine numerischen Variablen zur Ausreißer-Analyse.\n")
+} else {
+  knitr::kable(out_tbl, digits = 2, caption = "Ausreißer-Statistik je Variable (1.5 * IQR)")
+}
+```
+
+<div class="page-break"></div>
+
+# Fehlende Werte & Datenqualität
+
+```{r missing-quality}
+missing_block <- tibble(
+  kennzahl = c("Fehlende Zellen gesamt", "Anteil fehlend (%)", "Duplikate", "Duplikat-Anteil (%)"),
+  wert = c(overall_missing, round(missing_pct_total, 2), duplicate_rows, round(duplicate_pct, 2))
+)
+knitr::kable(missing_block, caption = "Qualitätsmetriken")
+```
+
+## Missingness Visualisierung
+
+```{r missing-visuals}
+if (has_naniar) {
+  vis_miss(data) +
+    theme_minimal(base_family = "Inter") +
+    labs(title = "Missing-Pattern", x = "Variablen", y = "Beobachtungen")
+} else {
+  cat("Paket 'naniar' ist nicht installiert. Anzeige der Fehlwert-Tabelle statt Heatmap.\n")
+  missing_tbl |> knitr::kable(digits = 2, caption = "Fehlwert-Tabelle")
+}
+```
+
+<div class="page-break"></div>
+
+# Anhang
+
+## Datenvorschau (erste 20 Zeilen)
+
+```{r data-head}
+knitr::kable(head(data, 20), caption = "Tabellenauszug")
+```
