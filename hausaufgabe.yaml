@@ -1,0 +1,104 @@
+base_seed: 200
+worksheet_count: 1
+output:
+  out_dir: out
+  file_prefix: hausaufgabe
+worksheet:
+  header_left_label: "Name:"
+  header_right_label: "Datum:"
+  page_title: "Hausaufgabe: Übungsblatt zum 2. Rechenmeister"
+  tasks:
+    - type: arithmetic_list
+      title: "1"
+      item_count: 10
+      operations: ["+", "-"]
+      min_value: 20
+      max_value: 99
+      max_second_operand: 9
+      cross_ten_probability: 0.5
+      columns: 2
+      answer_cells: 4
+      extra_rows: 0
+      cell_question: true
+    - type: arithmetic_list
+      title: "2"
+      item_count: 9
+      operations: ["+", "-"]
+      min_value: 20
+      max_value: 99
+      max_second_operand: 9
+      cross_ten_probability: 1.0
+      columns: 3
+      answer_cells: 4
+      extra_rows: 1
+      cell_question: true
+    - type: dice_plus_mal
+      title: "3 — Schreibe jeweils eine Plus- und eine Malaufgabe!"
+      dice_count: 4
+      dice_face_min: 2
+      dice_face_max: 6
+      group_count: 6
+      group_size_min: 3
+      group_size_max: 5
+    - type: money
+      title: "4 — Wie viel Geld ist es? Achte auf € und ct."
+      purse_count: 2
+      item_count_min: 4
+      item_count_max: 6
+      min_total_cents: 200
+      max_total_cents: 8000
+    - type: operation_table
+      title: "5"
+      page_break_before: true
+      header_mode: small_cols
+      result_range:
+        min: 10
+        max: 99
+      tables:
+        - operation: "+"
+          row_count: 2
+          col_count: 3
+          given_cells: random_0
+        - operation: "-"
+          row_count: 2
+          col_count: 3
+          given_cells: random_0
+    - type: arithmetic_list
+      title: "6"
+      item_count: 27
+      operations: ["·"]
+      min_value: 0
+      max_value: 10
+      max_second_operand: 10
+      result_max: 99
+      columns: 3
+      answer_cells: 2
+      total_cells: 7
+      cell_question: true
+    - type: number_sequence
+      title: "7 — Setze die Zahlenfolgen fort!"
+      sequences:
+        - length: 10
+          step: 2
+          start_min: 0
+          start_max: 0
+          given: first
+          given_count: 3
+        - length: 10
+          step: 5
+          start_min: 5
+          start_max: 5
+          given: first
+          given_count: 3
+        - length: 10
+          step: 10
+          start_min: 10
+          start_max: 10
+          given: last
+          given_count: 3
+    - type: number_triangle
+      title: "8 — Rechne!"
+      triangle_count: 2
+      inner_min: 1
+      inner_max: 20
+      single_two_digit_inner: true

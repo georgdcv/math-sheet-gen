@@ -1,5 +1,5 @@
-base_seed: 1234
-worksheet_count: 5
+base_seed: 132
+worksheet_count: 1
 output:
   out_dir: out
   file_prefix: rechenmeister
@@ -13,18 +13,18 @@ worksheet:
       show_helper_numbers: true
     - type: compare_numbers
       title: "Vergleiche! <, >, ="
-      item_count: 4
-      min_value: 0
+      item_count: 2
+      min_value: 20
       max_value: 100
       columns: 2
       equal_probability: 0.01
     - type: pre_succ_table
-      row_count: 2
+      row_count: 1
       min_value: 0
       max_value: 100
       given_field: mixed
     - type: arithmetic_list
-      item_count: 4
+      item_count: 2
       operations: ["+", "-"]
       min_value: 0
       max_value: 20
@@ -35,7 +35,7 @@ worksheet:
     - type: number_word_table
       first_row_example: true
       example_number: 78
-      row_count: 2
+      row_count: 1
       min_value: 11
       max_value: 99
       given_columns: ["word"]
@@ -51,16 +51,12 @@ worksheet:
         min: 10
         max: 100
       tables:
-        - operation: "+"
-          row_count: 2
-          col_count: 2
-          given_cells: random_1
         - operation: "-"
           row_count: 2
           col_count: 2
           given_cells: random_1
     - type: number_line
       start: 0
-      end: 100
+      end: 50
       major_tick_interval: 10
-      value_count: 4
+      value_count: 3

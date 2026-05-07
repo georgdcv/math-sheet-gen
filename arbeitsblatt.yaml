@@ -1,0 +1,129 @@
+base_seed: 500
+worksheet_count: 5
+output:
+  out_dir: out
+  file_prefix: arbeitsblatt
+worksheet:
+  header_left_label: "Name:"
+  header_right_label: "Datum:"
+  page_title: "Übungsblatt zum Rechenmeister"
+  tasks:
+    # Aufgabe 1: 6 Aufgaben, max bis zum Zehner (kein Übergang); kein +0/-0
+    - type: arithmetic_list
+      title: "1"
+      item_count: 6
+      operations: ["+", "-"]
+      min_value: 20
+      max_value: 99
+      min_second_operand: 1
+      max_second_operand: 9
+      cross_ten_probability: 0.0
+      columns: 2
+      answer_cells: 4
+      extra_rows: 0
+      cell_question: true
+      compact: true
+
+    # Aufgabe 2: 6 Aufgaben, immer mit Zehnerübergang
+    - type: arithmetic_list
+      title: "2"
+      item_count: 6
+      operations: ["+", "-"]
+      min_value: 20
+      max_value: 99
+      max_second_operand: 9
+      cross_ten_probability: 1.0
+      columns: 2
+      answer_cells: 4
+      extra_rows: 1
+      cell_question: true
+      compact: true
+
+    # Aufgabe 3: Würfel/Äpfel zeigen immer 5er, Anzahl variiert
+    - type: dice_plus_mal
+      title: "3 — Schreibe jeweils eine Plus- und eine Malaufgabe!"
+      dice_count_min: 3
+      dice_count_max: 6
+      dice_face_min: 5
+      dice_face_max: 5
+      group_count_min: 3
+      group_count_max: 6
+      group_size_min: 5
+      group_size_max: 5
+
+    # Aufgabe 4: links Euro-only, rechts Cent-only, kein Übergang
+    - type: money
+      title: "4 — Wie viel Geld ist es? Achte auf € und ct."
+      purses:
+        - mode: euro_only
+          item_count_min: 3
+          item_count_max: 5
+          min_total_cents: 300
+          max_total_cents: 9900
+          no_carry: true
+        - mode: cent_only
+          item_count_min: 3
+          item_count_max: 5
+          min_total_cents: 15
+          max_total_cents: 99
+          no_carry: true
+          coin_scale: large
+
+    # Aufgabe 5: 2x2-Tabellen — zweistellige Zeilenwerte (keine glatten 10er), einstellige Spaltenwerte
+    - type: operation_table
+      title: "5"
+      page_break_before: true
+      header_mode: small_cols
+      result_range:
+        min: 1
+        max: 108
+      tables:
+        - operation: "+"
+          row_count: 2
+          col_count: 2
+          given_cells: random_0
+        - operation: "-"
+          row_count: 2
+          col_count: 2
+          given_cells: random_0
+
+    # Aufgabe 6: Multiplikation mit 2/5/10, einer der Faktoren immer fest, 15 Aufgaben
+    - type: arithmetic_list
+      title: "6"
+      item_count: 15
+      operations: ["·"]
+      min_value: 0
+      max_value: 10
+      max_second_operand: 10
+      result_max: 99
+      columns: 3
+      answer_cells: 2
+      total_cells: 7
+      cell_question: true
+      fixed_operand_values: [2, 5, 10]
+      fixed_operand_position: any
+
+    # Aufgabe 7: Zwei Reihen 2er/5er/10er, eine vorne, eine hinten, Start bei 1xX
+    - type: number_sequence
+      title: "7 — Setze die Zahlenfolgen fort!"
+      sequences:
+        - length: 10
+          step_choices: [2, 5, 10]
+          start_at_step: true
+          given_choices: [first, last]
+          given_count: 3
+        - length: 10
+          step_choices: [2, 5, 10]
+          start_at_step: true
+          given_choices: [first, last]
+          given_count: 3
+
+    # Aufgabe 8: eine zweistellige + zwei einstellige innere Zahlen, mind. 2 Plus-Aufgaben mit Zehnerübergang
+    - type: number_triangle
+      title: "8 — Rechne!"
+      triangle_count: 2
+      inner_min: 1
+      inner_max: 99
+      outer_max: 100
+      single_two_digit_inner: true
+      min_crossing_outer: 2
